@@ -50,11 +50,24 @@ def ensure_table(self):
 def nearest(cls, lat=None, lon=None, ip=None, n=25, **kwargs):
     return list(itertools.islice(cls.nearby(lat=lat, lon=lat, ip=ip, **kwargs), n))
 
+@classmethod
+def getc(cls, *x,**y):
+    return cls.get_or_create(*x,**y)
+
 
 Base.save = save
 Base.query_by_attr = query_by_attr
 Base.get = get
+Base.getc = getc
 Base.get_or_create = get_or_create
 Base.find = find
 Base.ensure_table = ensure_table
 Base.nearest = nearest
+
+
+# rels
+post_liking = Table(
+    'post_liking', Base.metadata,
+    Column('user_id', Integer, ForeignKey('user.id'), primary_key=True),
+    Column('post_id', Integer, ForeignKey('post.id'), primary_key=True)
+)

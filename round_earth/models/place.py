@@ -25,14 +25,14 @@ class Place(Base):
 
     @classmethod
     @cache
-    def located_at(cls, lat=None, lon=None, ip=None, placename=None, mindist_km=10):
+    def loc(cls, lat=None, lon=None, ip=None, placename=None, mindist_km=10):
         if placename:
             place = Place.get(name=placename)
             if not place:
                 geo_d = geocode(placename)
                 place = Place.get(name=geo_d['name'])
                 if not place:
-                    place = Place.get_or_create(**geo_d)
+                    place = Place.getc(**geo_d)
         else:
             if not lat or not lon: lat,lon = geo_ip(ip)
             if not lat or not lon: return
@@ -40,12 +40,9 @@ class Place(Base):
             if places: 
                 place = places[0][0]
             else:
-                place = Place.get_or_create(**geodecode(lat,lon))
+                place = Place.getc(**geodecode(lat,lon))
         return place
     
-    @classmethod
-    def located_here(cls):
-        return cls.located_at()
 
     def dist_from(self, lat, lon, metric='km'):
         try:
@@ -73,6 +70,6 @@ class Place(Base):
         return f'POINT({self.lon} {self.lat})'
 
     def __repr__(self):
-        return f'Place(id={self.id}, name={self.name}, point="{self.point_str}")'
+        return f'Place(id={self.id}, name="{self.name}")'
 
 

@@ -14,6 +14,51 @@ class Post(Base):
     text_id: Mapped[int] = mapped_column(ForeignKey("text.id"))
     text: Mapped["Txt"] = relationship(foreign_keys=[text_id])
 
+    timestamp: Mapped[float]
+
+    likes: Mapped[List['User']] = relationship(
+        secondary=lambda: post_liking, 
+        back_populates="likes"
+    )
+
+    # reply_to_id: Mapped[int] = mapped_column(ForeignKey("post.id"),nullable=True)
+    # reply_to: Mapped["Post"] = relationship(foreign_keys=[reply_to_id])
+
+    # repost_of_id: Mapped[int] = mapped_column(ForeignKey("post.id"),nullable=True)
+    # repost_of: Mapped["Post"] = relationship(foreign_keys=[repost_of_id])
+
+    replying_to = relationship(
+        'Post', 
+        secondary=lambda: post_replying,
+        primaryjoin=lambda: Post.id == post_replying.c.post_id,
+        secondaryjoin=lambda: Post.id == post_replying.c.reply_id,
+        backref='replies'
+    )
+
+    reposting = relationship(
+        'Post', 
+        secondary=lambda: post_reposting,
+        primaryjoin=lambda: Post.id == post_reposting.c.post_id,
+        secondaryjoin=lambda: Post.id == post_reposting.c.repost_id,
+        backref='reposts'
+    )
+
+    @cached_property
+    def reply_to(self):
+        return first(self.replying_to)
+    
+    @cached_property
+    def repost_of(self):
+        return first(self.reposting)
+    
+    @cached_property
+    def is_repost(self):
+        return bool(self.repost_of)
+    
+    @cached_property
+    def txt(self):
+        return self.text.txt
+
     
     
     
@@ -39,12 +84,18 @@ class Post(Base):
     def __repr__(self):
         return f'''
 Post(
-    id={self.id}, 
-    text="{self.text.txt}",
-    user={self.user}, 
-    place={self.place})'
+    id = {self.id}, 
+    text = "{self.text.txt}",
+    user = {self.user}, 
+    place = {self.place})',
+    time = {self.datetime}
 )'''.strip()
     
+    @cached_property
+    def datetime(self):
+        return datetime.fromtimestamp(self.timestamp)
+
+
     def translate_to(self, lang):
         tr = self.text.translate_to(lang)
         tr.post = self
@@ -58,3 +109,16 @@ Post(
             l.append(tr)
         return l
 
+
+post_reposting = Table(
+    'post_reposting', Base.metadata,
+    Column('post_id', Integer, ForeignKey(Post.id), primary_key=True),
+    Column('repost_id', Integer, ForeignKey(Post.id), primary_key=True)
+)
+
+
+post_replying = Table(
+    'post_replying', Base.metadata,
+    Column('post_id', Integer, ForeignKey(Post.id), primary_key=True),
+    Column('reply_id', Integer, ForeignKey(Post.id), primary_key=True)
+)

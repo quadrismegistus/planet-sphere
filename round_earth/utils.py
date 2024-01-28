@@ -53,16 +53,6 @@ def translate_text(target: str, text: str) -> dict:
     return result
 
 
-def geodecode(lat=None, lon=None):
-    import reverse_geocode
-    if not lat or not lon: lat,lon = geo_ip()
-    res = reverse_geocode.get((lat, lon))
-    return {
-        'point': f'POINT({lon} {lat})',
-        'name': res.get('city', ''),
-        'country': res.get('country_code', ''),
-    }
-
 @cache
 def get_geocoder():
     from geopy.geocoders import GoogleV3
@@ -75,22 +65,43 @@ def geo_ipinfo(ip=None):
     res = geocoder.ip(ip if ip else 'me')
     return res.json
 
+@cache
 def geo_ip(ip=None, hostname_required=True):
     data = geo_ipinfo(ip)
     if not hostname_required or data.get('hostname'):
         return data.get('lat'),data.get('lng')
     return None,None
 
-def geodecode_google(lat=None, lon=None):
+
+
+def geodecode_offline(lat=None, lon=None):
+    import reverse_geocode
+    if not lat or not lon: lat,lon = geo_ip()
+    res = reverse_geocode.get((lat, lon))
+    return {
+        'point': f'POINT({lon} {lat})',
+        'name': res.get('city', ''),
+        'country': res.get('country_code', ''),
+    }
+
+
+def geodecode_google_loc(lat=None, lon=None):
     if not lat or not lon: lat,lon=geo_ip()
     if not lat or not lon: return
     geocoder = get_geocoder()
-    res = geocoder.reverse((lat,lon))
-    return res.raw
-    return {
-        'city': res.get('city', ''),
-        'country': res.get('country_code', ''),
-    }
+    loc = geocoder.reverse((lat,lon))
+    return loc
+
+def geodecode_google(lat=None,lon=None):
+    loc = geodecode_google_loc(lat,lon)
+    return geo_parse_loc(loc) if loc else {}
+
+def geodecode(lat=None, lon=None):
+    return merge_dicts(
+        geodecode_offline(lat,lon),
+        geodecode_google(lat,lon),
+    )
+
 
 @cache
 def geo_loc(placename):
@@ -103,8 +114,14 @@ def geo_name(placename):
     return loc.latitude, loc.longitude
 
 def geocode(placename):
-    loc = geo_loc(placename)
-    if not loc: return
+    loc=geo_loc(placename)
+    if not loc: return {}
+    return merge_dicts(
+        geodecode_offline(loc.latitude, loc.longitude),
+        geo_parse_loc(loc, with_geodecode=True),
+    )
+
+def geo_parse_loc(loc, with_geodecode=False):
 
     def get_parts(loc):
         return loc.raw.get('address_components',[])
@@ -114,20 +131,41 @@ def geocode(placename):
                 return d['short_name']
         return ''
     def get_name(loc):
-        return ', '.join(d['long_name'] for d in get_parts(loc) if d['long_name'] and d['long_name'][0].isalpha())
+        return ', '.join(
+            d['long_name'] 
+            for d in get_parts(loc) 
+            if (
+                {'locality','administrative_area_level_1','country'}&set(d['types'])
+                and d['long_name'] 
+                and d['long_name'][0].isalpha()
+            )
+        )
 
-    country = get_country(loc)
-    name = get_name(loc)
-    odx={**geodecode(loc.latitude, loc.longitude)}
-    if name: odx['name']=name
-    if country: odx['country']=country
-    return odx
+    return {
+        'point': f'POINT({loc.longitude} {loc.latitude})',
+        'name': get_name(loc),
+        'country': get_country(loc)
+    }
+
 
 
 
 
 def ensure_db_tables(clear=DB_CLEAR):
-    from .models import DB_TABLES
+    from .models import Base
     if clear: clear_db()
-    for table in DB_TABLES:
-        table.ensure_table()
+    Base.metadata.create_all(bind=get_db_engine())
+    # for table in DB_TABLES:
+        # table.ensure_table()
+
+def merge_dicts(*ld):
+    od = {}
+    for d in ld:
+        for k in d:
+            if not k in od or d[k]:
+                od[k]=d[k]
+    return od    
+    
+def first(l, default=None):
+    for x in l: return x
+    return default

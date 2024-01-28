@@ -3,7 +3,7 @@ from functools import lru_cache as cache, cached_property
 from typing import *
 # from fastapi import FastAPI
 # from sqlmodel import Field, Session, SQLModel, create_engine, select, Column
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import Session, Mapped, mapped_column, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from geoalchemy2 import Geometry
@@ -15,6 +15,8 @@ from shapely import wkb
 import itertools
 from sqlalchemy import and_
 import numpy as np
+import time
+from datetime import datetime
 
 PATH_DATA = os.path.expanduser('~/.cache/round-earth-backend')
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))

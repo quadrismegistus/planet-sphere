@@ -3,12 +3,29 @@ from .user import *
 from .text import *
 from .post import *
 
-DB_TABLES = [User, Place, Txt, Translation, Post]
 
 def test():
     ensure_db_tables(clear=True)
-    user = User.get_or_create(name='Marx')
-    post = user.post('Guten morgen!', lat=49.75565, lon=6.63935)
+    marx = User.getc(name='marx')
+    elon = User.getc(name='elon')
+    zuck = User.getc(name='zuck')
+    
+    post = marx.post('Guten morgen', placename='Trier')
     post.translate_to('fr')
-    post.translate_to('en')
-    return post
+
+    zuck.post('Good morning', placename='Palo Alto')
+    elon.post('I am an idiot', placename='San Francisco')
+
+    elon.follow(marx)
+    elon.follow(zuck)
+    zuck.follow(marx)
+
+    elon.like(post)
+    zuck.like(post)
+
+    repost = elon.repost(post, 'lol')
+
+    zuck.reply(repost, 'what?')
+    zuck.reply(post, 'good morning')
+    
+    return repost
