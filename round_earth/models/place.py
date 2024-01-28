@@ -10,7 +10,9 @@ class Place(Base):
     country: Mapped[Optional[str]] = mapped_column(String(2))
 
     @classmethod
-    def nearby(cls, lat, lon, mindist_km=None):
+    def nearby(cls, lat, lon, ip=None, mindist_km=None):
+        if not lat or not lon: lat,lon=geo_ip(ip)
+        if not lat or not lon: return
         point = get_point(lat, lon)
         for place in get_db_session().query(cls).order_by(
                 func.ST_Distance(
@@ -18,21 +20,27 @@ class Place(Base):
                     point,
                 )):
             dist = place.dist_from(lat, lon)
-            if not np.isnan(dist):
-                if mindist_km and dist > mindist_km: break
-                yield place, dist
+            if mindist_km and dist > mindist_km: break
+            yield place, dist
 
     @classmethod
-    def located_at(cls, lat=None, lon=None, ip=None, mindist_km=10):
-        if not lat or not lon:
-            lat,lon = geo_ip(ip)
-        if not lat or not lon:
-            return
-        places = cls.nearest(lat,lon,mindist_km=mindist_km)
-        if places: 
-            place = places[0][0]
+    @cache
+    def located_at(cls, lat=None, lon=None, ip=None, placename=None, mindist_km=10):
+        if placename:
+            place = Place.get(name=placename)
+            if not place:
+                geo_d = geocode(placename)
+                place = Place.get(name=geo_d['name'])
+                if not place:
+                    place = Place.get_or_create(**geo_d)
         else:
-            place = Place(**geodecode(lat,lon)).save()
+            if not lat or not lon: lat,lon = geo_ip(ip)
+            if not lat or not lon: return
+            places = cls.nearest(lat,lon,mindist_km=mindist_km)
+            if places: 
+                place = places[0][0]
+            else:
+                place = Place.get_or_create(**geodecode(lat,lon))
         return place
     
     @classmethod
@@ -41,7 +49,7 @@ class Place(Base):
 
     def dist_from(self, lat, lon, metric='km'):
         try:
-            dist = geodesic((lat, lon), (self.lat, self.lon))
+            dist = geodesic((lon, lat), (self.lon, self.lat))
             return getattr(dist, metric)
         except ValueError as e:
             print(e)

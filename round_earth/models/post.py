@@ -20,7 +20,10 @@ class Post(Base):
 
 
     @classmethod
-    def nearby(cls, lat, lon, mindist_km=None):
+    def nearby(cls, lat=None, lon=None, ip=None, mindist_km=None):
+        from .models import Place
+        if not lat or not lon: lat,lon=geo_ip(ip)
+        if not lat or not lon: return
         point = get_point(lat, lon)
         for post in get_db_session().query(cls).join(Place).order_by(
                 func.ST_Distance(

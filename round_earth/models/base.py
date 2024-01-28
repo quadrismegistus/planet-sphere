@@ -47,8 +47,8 @@ def ensure_table(self):
 
 
 @classmethod
-def nearest(cls, lat, lon, n=25, **kwargs):
-    return list(itertools.islice(cls.nearby(lat, lon, **kwargs), n))
+def nearest(cls, lat=None, lon=None, ip=None, n=25, **kwargs):
+    return list(itertools.islice(cls.nearby(lat=lat, lon=lat, ip=ip, **kwargs), n))
 
 
 Base.save = save

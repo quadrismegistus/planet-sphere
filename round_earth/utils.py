@@ -61,7 +61,6 @@ def geodecode(lat=None, lon=None):
         'point': f'POINT({lon} {lat})',
         'name': res.get('city', ''),
         'country': res.get('country_code', ''),
-        'type': '',
     }
 
 @cache
@@ -83,8 +82,8 @@ def geo_ip(ip=None, hostname_required=True):
     return None,None
 
 def geodecode_google(lat=None, lon=None):
-    if not lat or not lon:
-        lat,lon = geo_ip()
+    if not lat or not lon: lat,lon=geo_ip()
+    if not lat or not lon: return
     geocoder = get_geocoder()
     res = geocoder.reverse((lat,lon))
     return res.raw
@@ -92,6 +91,39 @@ def geodecode_google(lat=None, lon=None):
         'city': res.get('city', ''),
         'country': res.get('country_code', ''),
     }
+
+@cache
+def geo_loc(placename):
+    geocoder = get_geocoder()
+    loc = geocoder.geocode(placename)
+    return loc
+
+def geo_name(placename):
+    loc = geo_loc(placename)
+    return loc.latitude, loc.longitude
+
+def geocode(placename):
+    loc = geo_loc(placename)
+    if not loc: return
+
+    def get_parts(loc):
+        return loc.raw.get('address_components',[])
+    def get_country(loc):
+        for d in get_parts(loc):
+            if 'country' in set(d['types']):
+                return d['short_name']
+        return ''
+    def get_name(loc):
+        return ', '.join(d['long_name'] for d in get_parts(loc) if d['long_name'] and d['long_name'][0].isalpha())
+
+    country = get_country(loc)
+    name = get_name(loc)
+    odx={**geodecode(loc.latitude, loc.longitude)}
+    if name: odx['name']=name
+    if country: odx['country']=country
+    return odx
+
+
 
 
 def ensure_db_tables(clear=DB_CLEAR):
