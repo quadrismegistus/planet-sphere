@@ -23,5 +23,5 @@ def index() -> rx.Component:
     return rx.markdown(
         content, 
         component_map=styles.markdown_style,
-        on_mount=State.set_place
+        # on_mount=State.set_place
     )

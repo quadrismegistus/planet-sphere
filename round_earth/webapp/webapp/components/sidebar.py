@@ -119,7 +119,7 @@ def sidebar() -> rx.Component:
     return rx.box(
         rx.vstack(
             sidebar_header(),
-            rx.text(State.ip),
+            rx.markdown(f'```\n{State.place_json}\n```', on_mount=State.set_place),
             rx.vstack(
                 *[
                     sidebar_item(
