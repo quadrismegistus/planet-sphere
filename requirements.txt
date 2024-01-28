@@ -1,0 +1,11 @@
+# backend reqs
+fastapi[all]
+geoalchemy2
+psycopg2
+geopy
+shapely
+sqlalchemy-utils
+
+# frontend
+reflex
+google-cloud-translate
