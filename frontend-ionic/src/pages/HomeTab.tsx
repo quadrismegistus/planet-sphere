@@ -5,7 +5,7 @@ import './HomeTab.css';
 import { LocationContext } from '../contexts/LocationContext';
 
 const HomeTab: React.FC = () => {
-  const { location } = useContext(LocationContext);
+  const { locations } = useContext(LocationContext);
 
 
   return (
@@ -22,11 +22,11 @@ const HomeTab: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <ExploreContainer name="Home page" />
-        {location && (
+        {locations && (
           <div>
-            <p>City: {location.city}</p>
-            <p>Country: {location.country}</p>
-            <p>Coords (city): {location.latitude}, {location.longitude}</p>
+            <p>City: {locations.locations[0].name}</p>
+            <p>Country: {locations.locations[0].country}</p>
+            <p>Coords (city): {locations.locations[0].latitude}, {locations.locations[0].longitude}</p>
           </div>
         )}
       </IonContent>
