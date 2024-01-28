@@ -62,6 +62,7 @@ def get_geocoder():
 @cache
 def geo_ipinfo(ip=None):
     import geocoder
+    if ip in {'127.0.0.1'}: ip=None
     res = geocoder.ip(ip if ip else 'me')
     return res.json
 
@@ -74,9 +75,9 @@ def geo_ip(ip=None, hostname_required=True):
 
 
 
-def geodecode_offline(lat=None, lon=None):
+def geodecode_offline(lat=None, lon=None, ip=None):
     import reverse_geocode
-    if not lat or not lon: lat,lon = geo_ip()
+    if not lat or not lon: lat,lon = geo_ip(ip)
     res = reverse_geocode.get((lat, lon))
     return {
         'point': f'POINT({lon} {lat})',
@@ -85,21 +86,21 @@ def geodecode_offline(lat=None, lon=None):
     }
 
 
-def geodecode_google_loc(lat=None, lon=None):
-    if not lat or not lon: lat,lon=geo_ip()
+def geodecode_google_loc(lat=None, lon=None, ip=None):
+    if not lat or not lon: lat,lon=geo_ip(ip)
     if not lat or not lon: return
     geocoder = get_geocoder()
     loc = geocoder.reverse((lat,lon))
     return loc
 
-def geodecode_google(lat=None,lon=None):
-    loc = geodecode_google_loc(lat,lon)
+def geodecode_google(lat=None,lon=None, ip=None):
+    loc = geodecode_google_loc(lat,lon,ip=ip)
     return geo_parse_loc(loc) if loc else {}
 
-def geodecode(lat=None, lon=None):
+def geodecode(lat=None, lon=None, ip=None):
     return merge_dicts(
-        geodecode_offline(lat,lon),
-        geodecode_google(lat,lon),
+        geodecode_offline(lat,lon,ip=ip),
+        geodecode_google(lat,lon,ip=ip),
     )
 
 
@@ -152,9 +153,10 @@ def geo_parse_loc(loc, with_geodecode=False):
 
 
 def ensure_db_tables(clear=DB_CLEAR):
-    from .models import Base
+    from .models import Base, Place
     if clear: clear_db()
     Base.metadata.create_all(bind=get_db_engine())
+
     # for table in DB_TABLES:
         # table.ensure_table()
 

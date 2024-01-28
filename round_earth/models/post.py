@@ -43,22 +43,35 @@ class Post(Base):
         backref='reposts'
     )
 
-    @cached_property
+    @property
     def reply_to(self):
         return first(self.replying_to)
     
-    @cached_property
+    @property
     def repost_of(self):
         return first(self.reposting)
     
-    @cached_property
+    @property
     def is_repost(self):
         return bool(self.repost_of)
+    @property
+    def is_reply(self):
+        return bool(self.reply_to)
     
-    @cached_property
+    @property
     def txt(self):
         return self.text.txt
 
+    def to_dict(self):
+        return super().to_dict(
+            timestamp=self.timestamp,
+            user=self.user,
+            text=self.text,
+            place=self.place,
+            repost_of=self.repost_of,
+            reply_to=self.reply_to,
+            likes=[u.to_dict() for u in self.likes],
+        )
     
     
     

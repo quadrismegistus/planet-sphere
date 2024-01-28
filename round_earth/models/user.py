@@ -74,6 +74,9 @@ class User(Base):
     def feed(self): 
         from .feed import Feed
         return Feed(self)
+    
+    # def to_dict(self):
+    #     return super().
 
 
 

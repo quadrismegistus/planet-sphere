@@ -1,12 +1,8 @@
 """Common templates used between pages in the app."""
 
-from __future__ import annotations
+from ..imports import *
+from ..components.sidebar import sidebar
 
-from webapp import styles
-from webapp.components.sidebar import sidebar
-from typing import Callable
-
-import reflex as rx
 
 # Meta tags for the app.
 default_meta = [

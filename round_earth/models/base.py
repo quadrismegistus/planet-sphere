@@ -54,6 +54,24 @@ def nearest(cls, lat=None, lon=None, ip=None, n=25, **kwargs):
 def getc(cls, *x,**y):
     return cls.get_or_create(*x,**y)
 
+@property
+def jsonx(self):
+    return json.dumps(
+        self.data,
+        indent=2
+    )
+
+@property
+def data(self): return self.to_dict()
+
+def to_dict(self, **attrs):
+    d = {}
+    attrs = {'id':self.id, **(self.__dict__ if not attrs else attrs)}
+    for k,v in attrs.items():
+        if k[0]!='_' and v is not None:
+            d[self.__tablename__+'_'+k]=(v.to_dict() if isinstance(v,Base) else v)
+    return d
+
 
 Base.save = save
 Base.query_by_attr = query_by_attr
@@ -63,6 +81,9 @@ Base.get_or_create = get_or_create
 Base.find = find
 Base.ensure_table = ensure_table
 Base.nearest = nearest
+Base.json = jsonx
+Base.data = data
+Base.to_dict = to_dict
 
 
 # rels

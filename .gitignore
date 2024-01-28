@@ -1,4 +1,9 @@
-venv
-node_modules
-__pycache__
+*.db
+*.py[cod]
 .vscode
+.web
+__pycache__
+__pycache__/
+node_modules
+venv
+.DS_Store

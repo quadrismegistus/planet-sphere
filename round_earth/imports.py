@@ -1,3 +1,4 @@
+print('importing round_earth')
 import os
 from functools import lru_cache as cache, cached_property
 from typing import *
@@ -17,6 +18,7 @@ from sqlalchemy import and_
 import numpy as np
 import time
 from datetime import datetime
+import json
 
 PATH_DATA = os.path.expanduser('~/.cache/round-earth-backend')
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
@@ -32,4 +34,9 @@ DB_URL = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATA
 DB_CMD_PREF = f"PGPASSWORD={DB_PASSWORD} psql -U {DB_USERNAME} -h {DB_HOST} -p {DB_PORT}"
 DB_CLEAR = False
 
+
+NULL_LAT=-68.8333
+NULL_LON=-90.5833
+
 from .utils import *
+

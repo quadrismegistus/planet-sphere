@@ -1,8 +1,6 @@
 """Sidebar component for the app."""
 
-from webapp import styles
-
-import reflex as rx
+from ..imports import *
 
 
 def sidebar_header() -> rx.Component:
@@ -121,6 +119,7 @@ def sidebar() -> rx.Component:
     return rx.box(
         rx.vstack(
             sidebar_header(),
+            rx.text(State.ip),
             rx.vstack(
                 *[
                     sidebar_item(

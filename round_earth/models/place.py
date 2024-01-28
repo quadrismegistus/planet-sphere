@@ -5,14 +5,20 @@ class Place(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     point = Column(Geometry(geometry_type='POINT', srid=4326))
     name: Mapped[str]
-
-    type: Mapped[Optional[str]]
     country: Mapped[Optional[str]] = mapped_column(String(2))
 
+    def to_dict(self):
+        return super().to_dict(
+            name = self.name,
+            country = self.country,
+            lat = self.lat,
+            lon = self.lon
+        )
+    
     @classmethod
     def nearby(cls, lat, lon, ip=None, mindist_km=None):
         if not lat or not lon: lat,lon=geo_ip(ip)
-        if not lat or not lon: return
+        if not lat or not lon: lat,lon = NULL_LAT,NULL_LON
         point = get_point(lat, lon)
         for place in get_db_session().query(cls).order_by(
                 func.ST_Distance(
@@ -35,7 +41,7 @@ class Place(Base):
                     place = Place.getc(**geo_d)
         else:
             if not lat or not lon: lat,lon = geo_ip(ip)
-            if not lat or not lon: return
+            if not lat or not lon: return get_null_place()
             places = cls.nearest(lat,lon,mindist_km=mindist_km)
             if places: 
                 place = places[0][0]
@@ -73,3 +79,14 @@ class Place(Base):
         return f'Place(id={self.id}, name="{self.name}")'
 
 
+@cache
+def get_null_place():
+    place = Place.get(id=0)
+    if not place:
+        place = Place(
+            id=0,
+            point='POINT(0 0)',
+            name='Null Island',
+            country='XX'
+        ).save()
+    return place

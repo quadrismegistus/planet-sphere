@@ -1,8 +1,6 @@
 """The settings page."""
 
-from webapp.templates import template
-
-import reflex as rx
+from ..imports import *
 
 
 @template(route="/settings", title="Settings")
