@@ -1,7 +1,0 @@
-{
-  "name": "sphere",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
-}
