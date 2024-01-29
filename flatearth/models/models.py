@@ -29,3 +29,11 @@ def test():
     zuck.reply(post, 'good morning')
     
     return repost
+
+
+def ensure_db_tables(clear=DB_CLEAR):
+    if clear: clear_db()
+    Base.metadata.create_all(bind=get_db_engine())
+
+
+ensure_db_tables()
