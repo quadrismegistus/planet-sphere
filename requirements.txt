@@ -8,6 +8,7 @@ sqlalchemy-utils
 reverse_geocode
 geocoder
 ipython
+ipinfo
 
 # frontend
 reflex
