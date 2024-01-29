@@ -16,14 +16,6 @@ docker run -d \
   -p 5433:5432 \
   --name round-earth-postgis \
   postgis/postgis
-
-docker run -d \
-  -e PBF_URL=https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
-  -e REPLICATION_URL=https://download.geofabrik.de/europe/monaco-updates/ \
-  -p 8411:8080 \
-  --name round-earth-nominatim \
-  mediagis/nominatim:4.3
-
 ```
 
 #### Python

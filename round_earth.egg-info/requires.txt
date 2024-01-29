@@ -1,0 +1,11 @@
+fastapi[all]
+geoalchemy2
+psycopg2
+geopy
+shapely
+sqlalchemy-utils
+reverse_geocode
+geocoder
+ipython
+reflex
+google-cloud-translate
