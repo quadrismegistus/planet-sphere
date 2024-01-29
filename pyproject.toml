@@ -3,16 +3,16 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "round-earth"
+name = "flatearth"
 requires-python = ">=3.8.2"
 authors = [
     { name = "Ryan Heuser", email = "ryan.heuser@gmail.com" },
 ]
-description = "API/backend to Round Earth"
+description = "API/backend to Flatearth"
 readme = "README.md"
 license = { file = "LICENSE" }
 dynamic = ["version", "dependencies"]
-urls = { "Homepage" = "https://github.com/quadrismegistus/round-earth-backend", "Project Home" = "https://github.com/quadrismegistus/round-earth", "Bug Tracker" = "https://github.com/quadrismegistus/round-earth-backend/issues" }
+urls = { "Homepage" = "https://github.com/quadrismegistus/flatearth-backend", "Project Home" = "https://github.com/quadrismegistus/flatearth", "Bug Tracker" = "https://github.com/quadrismegistus/flatearth-backend/issues" }
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
@@ -23,10 +23,10 @@ classifiers = [
 ]
 
 [project.scripts]
-round-earth = "round_earth.cli:run"
+flatearth = "flatearth.cli:run"
 
 [tool.setuptools]
-packages = ['round_earth']
+packages = ['flatearth']
 
 [tool.setuptools.dynamic]
 version = {attr = "version.__version__"}

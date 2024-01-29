@@ -1,6 +1,6 @@
 """The dashboard page."""
 from ..imports import *
-from round_earth.models import User
+from flatearth.models import User
 
 
 

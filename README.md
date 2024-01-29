@@ -1,4 +1,4 @@
-# round earth
+# flatearth
 Towards a new public sphere
 
 
@@ -14,7 +14,7 @@ docker run -d \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=notflat \
   -p 5433:5432 \
-  --name round-earth-postgis \
+  --name flatearth-postgis \
   postgis/postgis
 ```
 
