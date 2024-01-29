@@ -2,16 +2,31 @@ from ..imports import *
 
 
 @cache
-def geo_ipinfo(ip=None):
-    import geocoder
+def get_ipinfo_handler():
+    handler = ipinfo.getHandler(IPINFO_TOKEN)
+    return handler
+
+
+def get_ipinfo(ip=None):
     if ip in {'127.0.0.1'}: ip = None
-    res = geocoder.ip(ip if ip else 'me')
-    return res.json
+    res = get_ipinfo_handler().getDetails(ip)
+    return res.details if res else {}
+
+
+@cache
+def geo_ipinfo(ip=None, hostname_required=True):
+    data = get_ipinfo(ip)
+    if not hostname_required or data.get('hostname'):
+        return {
+            'name': data.get('city', ''),
+            'country': data.get('country', ''),
+            'latitude': float(data.get('latitude', 0)),
+            'longitude': float(data.get('longitude', 0)),
+        }
+    return {}
 
 
 @cache
 def geo_ip(ip=None, hostname_required=True):
-    data = geo_ipinfo(ip)
-    if not hostname_required or data.get('hostname'):
-        return data.get('lat'), data.get('lng')
-    return None, None
+    data = geo_ipinfo(ip, hostname_required=hostname_required)
+    return data.get('latitude', 0), data.get('longitude', 0)
