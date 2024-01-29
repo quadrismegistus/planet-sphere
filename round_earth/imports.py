@@ -19,6 +19,7 @@ import numpy as np
 import time
 from datetime import datetime
 import json
+import string
 
 PATH_DATA = os.path.expanduser('~/.cache/round-earth-backend')
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))

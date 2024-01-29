@@ -61,6 +61,15 @@ def sidebar_footer() -> rx.Component:
     )
 
 
+def page_active(pagename):
+    pagename = pagename.lower().strip()
+    path = rx.State.router.page.path.strip(string.punctuation)
+    if not path:
+        return pagename in {'home', 'index'}
+    else:
+        return path == pagename.lower()
+
+
 def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
     """Sidebar item.
 
@@ -73,9 +82,7 @@ def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
         rx.Component: The sidebar item component.
     """
     # Whether the item is active.
-    active = (rx.State.router.page.path == f"/{text.lower()}") | (
-        (rx.State.router.page.path == "/") & text == "Home"
-    )
+    active = page_active(text)
 
     return rx.link(
         rx.hstack(
@@ -84,9 +91,7 @@ def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
                 height="2.5em",
                 padding="0.5em",
             ),
-            rx.text(
-                text,
-            ),
+            rx.text(text, ),
             bg=rx.cond(
                 active,
                 styles.accent_color,
@@ -119,15 +124,16 @@ def sidebar() -> rx.Component:
     return rx.box(
         rx.vstack(
             sidebar_header(),
-            rx.markdown(f'```\n{State.place_json}\n```', on_mount=State.set_place),
+            rx.markdown(f'```\n{State.place_json}\n```',
+                        on_mount=State.set_place),
             rx.vstack(
                 *[
                     sidebar_item(
-                        text=page.get("title", page["route"].strip("/").capitalize()),
+                        text=page.get("title",
+                                      page["route"].strip("/").capitalize()),
                         icon=page.get("image", "/github.svg"),
                         url=page["route"],
-                    )
-                    for page in get_decorated_pages()
+                    ) for page in get_decorated_pages()
                 ],
                 width="100%",
                 overflow_y="auto",

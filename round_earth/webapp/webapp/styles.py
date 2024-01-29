@@ -13,7 +13,12 @@ hover_accent_bg = {"_hover": {"bg": accent_color}}
 content_width_vw = "90vw"
 sidebar_width = "20em"
 
-template_page_style = {"padding_top": "5em", "padding_x": ["auto", "2em"], "flex": "1"}
+template_page_style = {
+    "padding_top": "1em",
+    "padding_x": ["auto", "2em"],
+    "flex": "1",
+    'width': '100%',
+}
 
 template_content_style = {
     "align_items": "flex-start",
@@ -45,8 +50,10 @@ base_style = {
 }
 
 markdown_style = {
-    "code": lambda text: rx.code(text, color="#1F1944", bg="#EAE4FD"),
-    "a": lambda text, **props: rx.link(
+    "code":
+    lambda text: rx.code(text, color="#1F1944", bg="#EAE4FD"),
+    "a":
+    lambda text, **props: rx.link(
         text,
         **props,
         font_weight="bold",

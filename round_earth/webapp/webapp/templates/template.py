@@ -2,7 +2,7 @@
 
 from ..imports import *
 from ..components.sidebar import sidebar
-
+from ..components.header import header
 
 # Meta tags for the app.
 default_meta = [
@@ -28,8 +28,7 @@ def menu_button() -> rx.Component:
                     tag="hamburger",
                     size="4em",
                     color=styles.text_color,
-                ),
-            ),
+                ), ),
             rx.menu_list(
                 *[
                     rx.menu_item(
@@ -37,17 +36,17 @@ def menu_button() -> rx.Component:
                             page["title"],
                             href=page["route"],
                             width="100%",
-                        )
-                    )
-                    for page in get_decorated_pages()
+                        )) for page in get_decorated_pages()
                 ],
                 rx.menu_divider(),
                 rx.menu_item(
-                    rx.link("About", href="https://github.com/reflex-dev", width="100%")
-                ),
+                    rx.link("About",
+                            href="https://github.com/reflex-dev",
+                            width="100%")),
                 rx.menu_item(
-                    rx.link("Contact", href="mailto:founders@=reflex.dev", width="100%")
-                ),
+                    rx.link("Contact",
+                            href="mailto:founders@=reflex.dev",
+                            width="100%")),
             ),
         ),
         position="fixed",
@@ -103,8 +102,8 @@ def template(
             on_load=on_load,
         )
         def templated_page():
-            return rx.hstack(
-                sidebar(),
+            return rx.vstack(
+                header(),
                 rx.box(
                     rx.box(
                         page_content(),
@@ -112,9 +111,8 @@ def template(
                     ),
                     **styles.template_page_style,
                 ),
-                menu_button(),
                 align_items="flex-start",
-                transition="left 0.5s, width 0.5s",
+                # transition="left 0.5s, width 0.5s",
                 position="relative",
             )
 
