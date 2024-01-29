@@ -1,4 +1,4 @@
-print('importing round_earth')
+print('importing flatearth')
 import os
 from functools import lru_cache as cache, cached_property
 from typing import *
@@ -22,14 +22,14 @@ import json
 import string
 import ipinfo
 
-PATH_DATA = os.path.expanduser('~/.cache/round-earth-backend')
+PATH_DATA = os.path.expanduser('~/.cache/flatearth-backend')
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
 
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
 
 DB_USERNAME = 'postgres'
 DB_PASSWORD = 'notflat'
-DB_DATABASE = 'round_earth'
+DB_DATABASE = 'flatearth'
 DB_HOST = 'localhost'
 DB_PORT = 5433
 DB_URL = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}'

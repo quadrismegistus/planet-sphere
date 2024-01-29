@@ -1,6 +1,6 @@
 """The home page of the app."""
 from ..imports import *
-from round_earth import geocode
+from flatearth import geocode
 
 
 @template(route="/", title="Home", image="/github.svg")

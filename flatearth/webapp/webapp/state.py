@@ -1,6 +1,6 @@
 from .imports import *
-from round_earth.utils import geodecode
-from round_earth.models import *
+from flatearth.utils import geodecode
+from flatearth.models import *
 
 
 class State(rx.State):

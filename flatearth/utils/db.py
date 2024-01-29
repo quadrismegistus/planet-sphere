@@ -23,15 +23,6 @@ def get_db_session():
     return Session(get_db_engine())
 
 
-def ensure_db_tables(clear=DB_CLEAR):
-    from ..models import Base, Place
-    if clear: clear_db()
-    Base.metadata.create_all(bind=get_db_engine())
-
-    # for table in DB_TABLES:
-    # table.ensure_table()
-
-
 def get_point(lat, lon):
     pointstr = f'POINT({lon} {lat})'
     point = func.Geometry(func.ST_GeographyFromText(pointstr))
