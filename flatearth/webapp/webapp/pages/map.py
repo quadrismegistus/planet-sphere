@@ -33,8 +33,6 @@ class MapState(rx.State):
 
     def add_point(self, lat=None, lon=None):
         if not lat or not lon: lat,lon=geo_ip()
-        print(lat,lon)
-        rx.console_log((lat,lon))
         self.fig.add_scattergeo(
             lat=[lat * random.random()],
             lon=[lon * random.random()],
@@ -52,6 +50,9 @@ class MapState(rx.State):
     def get_layout(self) -> go.Figure:
         return self.fig
 
+
+
+
 @template(route="/", title="Map", image="/map-location-pin.svg")
 def map_page() -> rx.Component:
     """The home page.
@@ -62,9 +63,17 @@ def map_page() -> rx.Component:
     rxfig = rx.plotly(
         data=MapState.get_fig, 
         layout=MapState.layout,
-        use_resize_handler=True,
+        # width=WindowState.screen_width_px,
+        # height=WindowState.proportional_height_px,
+        use_resize_handler=False,
+        
     )
-    rxfig._add_style({'width':'100%','height':'100%', 'margin':0,'padding':0,'border':'none'})
+    rxfig._add_style({
+        'width':WindowState.screen_width_px,
+        'height':WindowState.proportional_height_px, 
+        'margin':0,
+        'padding':0,
+        })
 
     button = rx.button(
         "Start", on_click=MapState.add_point()
@@ -73,12 +82,13 @@ def map_page() -> rx.Component:
     return rx.box(
         button,
         rxfig, 
-        height='99dvh', 
+        # height='99dvh',
+        height='fit-content', 
         width='99dvw', 
         position='absolute',
         top=0,
         left=0,
         align_items='top',
-        padding_top='5rem'
-        # z_index=-1
+        on_click=WindowState.get_client_values,
+        border='1px solid blue'
     )
