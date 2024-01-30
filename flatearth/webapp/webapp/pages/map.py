@@ -2,18 +2,8 @@
 from ..imports import *
 from flatearth.utils.mapping import *
 
-def plot_map(width=1000, height=1000) -> go.Figure:
-    df = px.data.gapminder().query("year == 2007")
-    # fig = px.scatter_geo(df, 
-    #     locations="iso_alpha",
-    #     # color="continent", # which column to use to set the color of markers
-    #     hover_name="country", # column added to hover information
-    #     size="pop", # size of markers
-    #     projection="miller",
-    # )
-    fig = go.Figure(
-        go.Scattergeo()
-    )
+def init_map() -> go.Figure:
+    fig = go.Figure(go.Scattergeo())
     fig.update_geos(
         visible=True, 
         showframe=False,
@@ -33,6 +23,34 @@ def plot_map(width=1000, height=1000) -> go.Figure:
     relayout_fig(fig)
     return fig
 
+def init_layout():
+    fig = init_map()
+    return fig.to_dict().get('layout',{})
+
+class MapState(rx.State):
+    fig:go.Figure = init_map()
+    layout:dict = init_layout()
+
+    def add_point(self, lat=None, lon=None):
+        if not lat or not lon: lat,lon=geo_ip()
+        print(lat,lon)
+        rx.console_log((lat,lon))
+        self.fig.add_scattergeo(
+            lat=[lat * random.random()],
+            lon=[lon * random.random()],
+            marker_size = 10,
+            marker_color = 'rgb(65, 105, 225)', # blue
+            marker_symbol = 'star',
+            showlegend = False
+        )
+
+    @rx.var
+    def get_fig(self) -> go.Figure:
+        return self.fig
+    
+    @rx.var
+    def get_layout(self) -> go.Figure:
+        return self.fig
 
 @template(route="/", title="Map", image="/map-location-pin.svg")
 def map_page() -> rx.Component:
@@ -41,12 +59,19 @@ def map_page() -> rx.Component:
     Returns:
         The UI for the home page.
     """
-
-    fig = plot_map()
-    layout = fig.to_dict().get('layout',{})
-    rxfig = rx.plotly(data=fig, layout=layout, use_resize_handler=True)
+    rxfig = rx.plotly(
+        data=MapState.get_fig, 
+        layout=MapState.layout,
+        use_resize_handler=True,
+    )
     rxfig._add_style({'width':'100%','height':'100%', 'margin':0,'padding':0,'border':'none'})
+
+    button = rx.button(
+        "Start", on_click=MapState.add_point()
+    )
+
     return rx.box(
+        button,
         rxfig, 
         height='99dvh', 
         width='99dvw', 
