@@ -116,8 +116,7 @@ def template(
                 align_items="flex-start",
                 # transition="left 0.5s, width 0.5s",
                 position="relative",
-                on_mount=WindowState.get_client_values
-            )
+                on_mount=WindowState.watch_screen_size)
 
         return templated_page
 
