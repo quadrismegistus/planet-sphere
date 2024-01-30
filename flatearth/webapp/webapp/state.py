@@ -8,6 +8,9 @@ class State(rx.State):
 
     place_data: dict = {}
     place_json: str = ''
+    place_name: str = ''
+
+    user_name: str = ''
 
     @rx.var
     def ip(self) -> str:
@@ -17,5 +20,6 @@ class State(rx.State):
         place = Place.loc(ip=self.ip)
         self.place_data = place.data
         self.place_json = place.json
+        self.place_name = place.name
     
     

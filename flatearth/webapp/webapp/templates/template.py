@@ -102,15 +102,17 @@ def template(
             on_load=on_load,
         )
         def templated_page():
-            return rx.vstack(
-                header(),
+            page_box = rx.box(
                 rx.box(
-                    rx.box(
-                        page_content(),
-                        **styles.template_content_style,
-                    ),
-                    **styles.template_page_style,
+                    page_content(),
+                    **styles.template_content_style,
                 ),
+                **styles.template_page_style,
+            )
+            return rx.vstack(
+                # sidebar(),
+                header(),
+                page_box,
                 align_items="flex-start",
                 # transition="left 0.5s, width 0.5s",
                 position="relative",

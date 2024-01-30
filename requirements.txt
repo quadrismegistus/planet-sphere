@@ -13,3 +13,6 @@ ipinfo
 # frontend
 reflex
 google-cloud-translate
+
+plotly
+pandas

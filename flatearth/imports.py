@@ -21,6 +21,9 @@ from datetime import datetime
 import json
 import string
 import ipinfo
+from base64 import b64decode,b64encode
+import plotly.express as px
+import pandas as pd
 
 PATH_DATA = os.path.expanduser('~/.cache/flatearth-backend')
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
@@ -39,5 +42,9 @@ IPINFO_TOKEN = '90df1baf7c373a'
 
 NULL_LAT = -68.8333
 NULL_LON = -90.5833
+
+
+MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
+MAPBOX_ACCESS_TOKEN = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 
 from .utils import *

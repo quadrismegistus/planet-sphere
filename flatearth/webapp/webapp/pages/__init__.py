@@ -1,3 +1,3 @@
-from .dashboard import dashboard
-from .index import index
-from .settings import settings
+from .account import *
+from .feed import *
+from .map import *

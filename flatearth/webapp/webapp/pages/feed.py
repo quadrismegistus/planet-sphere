@@ -17,8 +17,8 @@ class UserListState(rx.State):
             UserDict(id=user.id, name=user.name) for user in User.find()
         ]
 
-@template(route="/dashboard", title="Dashboard")
-def dashboard() -> rx.Component:
+@template(route="/feed", title="Feed", image="/feed.svg")
+def feed_page() -> rx.Component:
     """The dashboard page.
 
     Returns:

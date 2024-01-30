@@ -22,8 +22,8 @@ template_page_style = {
 
 template_content_style = {
     "align_items": "flex-start",
-    "box_shadow": box_shadow,
-    "border_radius": border_radius,
+    # "box_shadow": box_shadow,
+    # "border_radius": border_radius,
     "padding": "1em",
     "margin_bottom": "2em",
 }
@@ -47,6 +47,8 @@ base_style = {
         **overlapping_button_style,
     },
     rx.MenuItem: hover_accent_bg,
+    '.modebar-container':{'display':'none'},
+    'body':{'background_color':'black'}
 }
 
 markdown_style = {

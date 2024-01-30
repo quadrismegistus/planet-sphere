@@ -11,31 +11,37 @@ def sidebar_header() -> rx.Component:
     """
     return rx.hstack(
         # The logo.
-        rx.image(
-            src="/icon.svg",
-            height="2em",
+        # rx.image(
+        #     src="/icon.svg",
+        #     height="2em",
+        # ),
+        rx.heading(
+            'flat earth', 
+            font_family='cursive', 
+            font_size='2rem',
+            padding='2rem'
         ),
-        rx.spacer(),
         # Link to Reflex GitHub repo.
-        rx.link(
-            rx.center(
-                rx.image(
-                    src="/github.svg",
-                    height="3em",
-                    padding="0.5em",
-                ),
-                box_shadow=styles.box_shadow,
-                bg="transparent",
-                border_radius=styles.border_radius,
-                _hover={
-                    "bg": styles.accent_color,
-                },
-            ),
-            href="https://github.com/reflex-dev/reflex",
-        ),
+        # rx.link(
+        #     rx.center(
+        #         rx.image(
+        #             src="/github.svg",
+        #             height="3em",
+        #             padding="0.5em",
+        #         ),
+        #         box_shadow=styles.box_shadow,
+        #         bg="transparent",
+        #         border_radius=styles.border_radius,
+        #         _hover={
+        #             "bg": styles.accent_color,
+        #         },
+        #     ),
+        #     href="https://github.com/reflex-dev/reflex",
+        # ),
         width="100%",
-        border_bottom=styles.border,
-        padding="1em",
+        text_align='center'
+        # border_bottom=styles.border,
+        # padding="1em",
     )
 
 
@@ -82,7 +88,8 @@ def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
         rx.Component: The sidebar item component.
     """
     # Whether the item is active.
-    active = page_active(text)
+    active = (rx.State.router.page.path == f"/{text.lower()}") | (
+        (rx.State.router.page.path == "/") & text == "Map")
 
     return rx.link(
         rx.hstack(
@@ -124,8 +131,6 @@ def sidebar() -> rx.Component:
     return rx.box(
         rx.vstack(
             sidebar_header(),
-            rx.markdown(f'```\n{State.place_json}\n```',
-                        on_mount=State.set_place),
             rx.vstack(
                 *[
                     sidebar_item(
@@ -140,14 +145,17 @@ def sidebar() -> rx.Component:
                 align_items="flex-start",
                 padding="1em",
             ),
-            rx.spacer(),
-            sidebar_footer(),
-            height="100dvh",
+            # rx.spacer(),
+            # sidebar_footer(),
+            # height="100dvh",
         ),
         display=["none", "none", "block"],
         min_width=styles.sidebar_width,
-        height="100%",
+        # height="100%",
         position="sticky",
         top="0px",
         border_right=styles.border,
+        z_index=100,
+        backdrop_filter='blur(2px)'
+
     )
