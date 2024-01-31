@@ -54,16 +54,17 @@ def init_map() -> go.Figure:
         visible=True,
         showframe=False,
         # resolution=50,
-        showcountries=True,
+        showcountries=False,
         showcoastlines=True,
         showland=False,
         showocean=False,
         showrivers=False,
         showlakes=False,
+        landcolor='darkseagreen',
         coastlinecolor='#666666',
         countrycolor="#c7c7c7",
         rivercolor="#b4d4ff",
-        oceancolor="#b4d4ff",
+        oceancolor="lightblue",
         projection_type='baker')
     relayout_fig(fig)
     return fig
@@ -94,8 +95,8 @@ def jiggle(lat_or_lon):
 
 box_width=400
 box_height=400
-box_offset=10
-box_offset_h = box_offset*2
+box_offset=5
+box_offset_h = box_offset
 
 class HoverState(rx.State):
     hover_html: str = ''
@@ -202,6 +203,7 @@ class MapState(rx.State):
         lats = [jiggle(post.place.lat) for post in posts]
         lons = [jiggle(post.place.lon) for post in posts]
         sizes = [len(post.likes) for post in posts]
+        colors = [post.place.geo.country_color for post in posts]
         mins,maxs = min(sizes),max(sizes)
         sizes = [translate_range(v,(mins,maxs),(10,25)) for v in sizes]
         customdatas = [
@@ -216,8 +218,12 @@ class MapState(rx.State):
             name='',
             marker_size=sizes,
             hovertemplate="%{customdata}",
-            marker_color='#1a9549',
-            marker_symbol='circle-open',
+            # marker_color='#1a9549',
+            marker_color=colors,
+            marker_symbol='circle',
+            marker_opacity=.25,
+            marker_line_width=2,
+            marker_line_color='#888888',
             showlegend=False,
         )
         self.fig = fig
@@ -297,7 +303,7 @@ def map_page() -> rx.Component:
         left=HoverState.box_left,
         max_width=f'{box_width}px',
         max_height=f'{box_height}px',
-        background_color=HoverState.box_color,
+        background_color='rgba(255,255,255,0.666)',
         backdrop_filter='blur(5px)',
         overflow_y='scroll',
         border='1px solid black',

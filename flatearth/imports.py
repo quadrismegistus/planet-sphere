@@ -31,13 +31,13 @@ import reverse_geocode
 from diskcache import Cache
 from geopy.geocoders import GeoNames
 from tqdm import tqdm
-
+import pickle
 
 PATH_DATA = os.path.expanduser('~/.cache/flatearth')
 os.makedirs(PATH_DATA,exist_ok=True)
 cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
-PATH_REPO_DATA = os.path.join(PATH_REPO,'data')
+PATH_REPO_DATA = os.path.join(PATH_REPO,'flatearth','data')
 
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
 

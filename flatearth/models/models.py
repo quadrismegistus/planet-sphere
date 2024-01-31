@@ -4,6 +4,20 @@ from .text import *
 from .post import *
 
 
+demoposts = [
+    "Just tried the new vegan burger at Green Bites Café – absolutely delicious! 🌱🍔 #VeganFood #Foodie",
+    "Morning run completed, feeling energized and ready to tackle the day! 🏃‍♂️💪 #MorningRun #FitnessGoals",
+    "In awe of the sunset I witnessed today. Nature's beauty is truly unmatched. 🌅 #SunsetLover #NaturePhotography",
+    "Can't believe how much I've learned in my coding journey this month. Persistence pays off! #CodeNewbie #100DaysOfCode",
+    "Throwback to our amazing beach holiday last summer. Can't wait to travel again! 🏖️✈️ #TravelMemories #Wanderlust",
+    "Just finished reading 'The Midnight Library' and wow, what an emotional rollercoaster! 📚 #BookRecommendations #Readers",
+    "Exploring the local art scene this weekend was a blast. So much talent out there! 🎨 #ArtLover #SupportLocalArtists",
+    "Coffee and jazz music – the perfect combo for a relaxing Sunday morning. ☕🎷 #SundayVibes #Relaxation",
+    "DIY home renovation project: complete! Feeling proud and a bit exhausted. 🛠️🏡 #HomeImprovement #DIYProjects",
+    "Gearing up for tonight's game. Let's go team! ⚽🏆 #GameDay #SportsFan"
+]
+
+
 def test(clear=True):
     ensure_db_tables(clear=clear)
     marx = User.getc(name='marx')
@@ -31,19 +45,19 @@ def test(clear=True):
 
     cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sydney']
 
-    for city in cities:
+    for city in tqdm(cities):
         user = User.getc(name=city.split()[0]+'Lover69')
         user.post(f'I love {city}!', placename=city)
 
-    for n in tqdm(list(range(1000))):
+    for n in tqdm(list(range(100))):
         lat,lon = random_lat_lon()
-        random.choice(User.all()).post(
-            f'''Just posting again the {n}th time. Just enjoyed a peaceful afternoon at the park, watching the sunset and listening to my favorite playlist. 🌅🎶 It's moments like these that remind me to appreciate the simple things in life. #NatureLover #SunsetVibes. 🍃 Later, tried out a new recipe for homemade pizza - turned out pretty amazing! Who knew cooking could be this fun? 🍕😊 #HomeChef #CookingAdventures. Finally, wrapped up the day with a good book and some quiet time. #EveningReads #RelaxationMode. 📚✨ What’s your go-to activity for a chill day?''', 
+        User.random().post(
+            random.choice(demoposts), 
             lat=lat, 
             lon=lon
         )
 
-    for n in tqdm(list(range(1000))):
+    for n in tqdm(list(range(100))):
         u = User.random()
         p = Post.random()
         u.like(p)

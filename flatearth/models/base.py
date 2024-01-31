@@ -49,6 +49,10 @@ def get_or_create(cls, **kwargs):
     return obj
 
 @classmethod
+def create(cls, **kwargs):
+    return cls(**kwargs).save()
+
+@classmethod
 def find(cls, **kwargs):
     return cls.query_by_attr(**kwargs).all()
 
@@ -111,6 +115,7 @@ Base.iter = iter
 Base.all = all
 Base.first = _first
 Base.random = rand
+Base.create = create
 
 # rels
 post_liking = Table(

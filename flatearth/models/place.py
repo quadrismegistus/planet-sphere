@@ -5,9 +5,7 @@ class Place(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     point = Column(Geometry(geometry_type='POINT', srid=4326))
     name: Mapped[str]
-    uri: Mapped[Optional[str]]
-    # country: Mapped[Optional[str]] = mapped_column(String(2))
-    data_json: Mapped[Optional[str]]
+    geopkl: Mapped[bytes]
 
     def to_dict(self):
         return super().to_dict(
@@ -15,34 +13,78 @@ class Place(Base):
         )
     
     @classmethod
-    def nearby(cls, lat, lon, ip=None, maxdist_km=None):
-        if not lat or not lon: lat,lon=geo_ip(ip)
-        if not lat or not lon: lat,lon = NULL_LAT,NULL_LON
-        point = get_point(lat, lon)
-        for place in get_db_session().query(cls).order_by(
+    def from_geo(self, geo):
+        return self.locate(geo=geo)
+
+    @classmethod
+    def as_row(self, geo):
+        return dict(
+            point=geo.point_str,
+            name=geo.name,
+            geopkl=geo.pkl
+        )
+    
+    @classmethod
+    def nearby(
+            self, 
+            lat=None, 
+            lon=None, 
+            ip=None, 
+            placename=None,
+            geo=None, 
+            maxdist_km=10):
+        
+        # get location
+        if not geo:
+            geo = Geocode(
+                lat=lat,
+                lon=lon,
+                ip=ip,
+                placename=placename
+            )
+        # force safe location
+        geo = geo.safe
+
+        for place in get_db_session().query(self).order_by(
                 func.ST_Distance(
-                    cls.point,
-                    point,
+                    self.point,
+                    geo.point,
                 )):
-            dist = place.dist_from(lat, lon)
+            dist = place.geo.dist(geo, metric='km')
             if maxdist_km and dist > maxdist_km: break
             yield place, dist
 
     @classmethod
     @cache
-    def locate(self, lat=None, lon=None, ip=None, placename=None, maxdist_km=10):
-        geo = Geocode(
-            lat=lat,
-            lon=lon,
-            ip=ip,
-            placename=placename
-        )
-        place = self.nearest(lat,lon,maxdist_km=maxdist_km)
-        if not place:
-            if not geo.name:
-                return
-            place = Place.getc(**geo.data_db)
-        place._geo = geo
+    def locate(
+            self, 
+            lat=None, 
+            lon=None, 
+            ip=None, 
+            placename=None,
+            geo=None, 
+            maxdist_km=10):
+        
+        # get location
+        if not geo:
+            geo = Geocode(
+                lat=lat,
+                lon=lon,
+                ip=ip,
+                placename=placename
+            )
+        
+        # force safe location
+        geo = geo.safe
+        
+        # find nearby existing locs
+        place = self.nearest(geo.lat,geo.lon,maxdist_km=maxdist_km)
+        
+        # if no place and we have at least a name
+        if not place and geo.name:
+            # create new place from geo
+            place = Place.create(**Place.as_row(geo))
+        
         return place
     
 
@@ -54,28 +96,14 @@ class Place(Base):
             # print(e)
             return np.nan
 
+    @property
+    def lat(self): return self.geo.lat
+    @property
+    def lon(self): return self.geo.lon
+
     @cached_property
-    def data_json_d(self):
-        return json.loads(self.data_json)
-
-    @property
-    def lat(self): return self.data_json_d.get('lat')
-    @property
-    def lon(self): return self.data_json_d.get('lon')
-    @property
-    def city(self): return self.data_json_d.get('city','')
-    @property
-    def country(self): return self.data_json_d.get('country','')
-
-    @property
     def geo(self):
-        if not hasattr(self,'_geo') or not self._geo:
-            self._geo = Geocode(placename=self.name)
-        return self._geo
-
-    @cached_property
-    def point_str(self):
-        return f'POINT({self.lon} {self.lat})'
+        return Geocode.from_pkl(self.geopkl)
 
     def __repr__(self):
         return f'Place(id={self.id}, name="{self.name}")'

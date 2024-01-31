@@ -19,3 +19,4 @@ pandas
 humanfriendly
 diskcache
 tqdm
+logmap

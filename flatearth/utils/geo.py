@@ -2,6 +2,11 @@ from ..imports import *
 from .utils import merge_dicts
 from .ip import geo_ip
 
+def geodist(latlon1,latlon2,metric='km'):
+    if latlon1==latlon2: return 0
+    dist = geodesic(latlon1,latlon2)
+    return getattr(dist,metric) if dist else np.nan
+
 
 @cache
 def get_geocoder():
@@ -150,7 +155,7 @@ class Geocode:
             exactly_one=True,
             timeout=30,
             language=lang,
-            extratags=False,
+            extratags=True,
             addressdetails=True,
             namedetails=True,
             **kwargs
@@ -200,12 +205,32 @@ class Geocode:
     @property
     def lon(self):
         return self.loc.longitude if self.loc else self._lon
-
+    @property
+    def latlon(self):
+        return (self.lat,self.lon)
     
     @cached_property
     def address(self):
         return self.loc.raw.get('address',{}) if self.loc else {}
-    
+    @cached_property
+    def extratags(self):
+        return self.loc.raw.get('extratags',{}) if self.loc else {}
+    @property
+    def wikidata(self):
+        return self.extratags.get('wikidata','')
+    @property
+    def population(self):
+        return int(self.extratags.get('population',0))
+    @property
+    def default_lang(self):
+        return self.extratags.get('default_language','')
+    @property
+    def local_name(self):
+        return self.name_details.get(
+            f'name:{self.default_lang}',
+            ''
+        )
+
     @property
     def city(self):
         return self.address.get('city','')
@@ -216,7 +241,7 @@ class Geocode:
     
     @property
     def country_code(self):
-        return self.address.get('country_code','')
+        return self.address.get('country_code','').upper()
     
     @property
     def address_type(self):
@@ -250,12 +275,15 @@ class Geocode:
             'county',
             'state',
             'region',
-            'country'
+            'country',
+            'country_code'
         ]
-        return {
+        d = {
             x:self.address.get(x,'')
             for x in keys
         }
+        d['country_code'] = d.get('country_code','').upper()
+        return d
 
     @property
     def name(self):
@@ -317,6 +345,8 @@ class Geocode:
             )
             return dist.km
 
+    def dist(self, geo, metric='km'):
+        return geodist(self.latlon,geo.latlon,metric=metric)
 
     def dist_from(self, lat, lon, lat2=None, lon2=None):
         dist = geodesic(
@@ -327,32 +357,58 @@ class Geocode:
             )
         )
         return dist
-
+    
     @property
     def data(self):
         return dict(
             uri=self.uri,
             name=self.name,
+            name_local=self.local_name,
             lat=self.lat,
             lon=self.lon,
-            **{k:v for k,v in self.name_d.items() if v}
+            **self.name_d,
+            wikidata=self.wikidata,
+            population=self.population,
+            lang_default=self.default_lang,
         )
+    
+    @property
+    def pkl(self):
+        # make sure location and safe loc found
+        self.loc,self.safe.loc
+        return b64encode(pickle.dumps(self))
+    @property
+    def pkl_s(self):
+        return self.pkl.decode('utf-8')
+    
+    @classmethod
+    def from_pkl(self, pkl):
+        if type(pkl)==str: pkl=pkl.encode('utf-8')
+        return pickle.loads(b64decode(pkl))
     
     @property
     def point_str(self):
         return f'POINT({self.lon} {self.lat})'
-
     @property
-    def data_db(self):
-        return dict(
-            point=self.safe.point_str,
-            name=self.safe.name,
-            uri=self.safe.uri,
-            data_json=json.dumps(self.safe.data)
-        )
+    def point(self):
+        from .db import get_point
+        return get_point(self.lat, self.lon)
+    
+    @property
+    def country_colors(self):
+        return get_country_colors().get(self.country_code,[])
+    @property
+    def country_color(self,default='#000000'):
+        colors = self.country_colors
+        return default if not colors else random.choice(colors)
+
+
     
 
-
+@cache
+def get_country_colors():
+    with open(os.path.join(PATH_REPO_DATA,'national-colors-hex.json')) as f:
+        return json.load(f)
 
 
 
