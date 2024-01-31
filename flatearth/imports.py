@@ -37,6 +37,7 @@ PATH_DATA = os.path.expanduser('~/.cache/flatearth')
 os.makedirs(PATH_DATA,exist_ok=True)
 cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
+PATH_REPO_DATA = os.path.join(PATH_REPO,'data')
 
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
 
