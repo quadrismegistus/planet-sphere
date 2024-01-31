@@ -4,8 +4,8 @@ from .text import *
 from .post import *
 
 
-def test():
-    ensure_db_tables(clear=True)
+def test(clear=True):
+    ensure_db_tables(clear=clear)
     marx = User.getc(name='marx')
     elon = User.getc(name='elon')
     zuck = User.getc(name='zuck')
@@ -27,13 +27,21 @@ def test():
 
     zuck.reply(repost, 'what?')
     zuck.reply(post, 'good morning')
+
+
+    cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sidney']
+    for city in cities:
+        user = User.getc(name=city.split()[0]+'Lover69')
+        user.post(f'I love {city}!', placename=city)
+
+    for n in range(50):
+        lat,lon = random_lat_lon()
+        user.post(
+            f'Just posting again the {n}th time', 
+            lat=lat, 
+            lon=lon
+        )
     
     return repost
 
 
-def ensure_db_tables(clear=DB_CLEAR):
-    if clear: clear_db()
-    Base.metadata.create_all(bind=get_db_engine())
-
-
-ensure_db_tables()

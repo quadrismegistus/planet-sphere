@@ -26,8 +26,15 @@ import ipinfo
 from base64 import b64decode, b64encode
 import plotly.express as px
 import pandas as pd
+from humanfriendly import format_timespan
+import reverse_geocode
+from diskcache import Cache
+from geopy.geocoders import GeoNames
 
-PATH_DATA = os.path.expanduser('~/.cache/flatearth-backend')
+
+PATH_DATA = os.path.expanduser('~/.cache/flatearth')
+os.makedirs(PATH_DATA,exist_ok=True)
+cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 PATH_REPO = os.path.dirname(os.path.dirname(__file__))
 
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
@@ -47,5 +54,8 @@ NULL_LON = -90.5833
 
 MAPBOX_ACCESS_TOKEN_b64 = b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
 MAPBOX_ACCESS_TOKEN = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
+
+GEONAMES_USERNAME = 'quadrismegistus'
+DEFAULT_LANG='en'
 
 from .utils import *

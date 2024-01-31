@@ -1,9 +1,13 @@
 from ..imports import *
 
+def ensure_db_tables(clear=DB_CLEAR):
+    from ..models import Base
+    if clear: clear_db()
+    Base.metadata.create_all(bind=get_db_engine())
 
 def clear_db(db_url=DB_URL):
     if database_exists(db_url):
-        cmd = f"{DB_CMD_PREF} -c 'DROP DATABASE {DB_DATABASE};'"
+        cmd = f'{DB_CMD_PREF} -c "DROP DATABASE {DB_DATABASE};"'
         os.system(cmd)
 
 
@@ -20,6 +24,7 @@ def get_db_engine(clear=DB_CLEAR, db_url=DB_URL):
 
 @cache
 def get_db_session():
+    ensure_db_tables()
     return Session(get_db_engine())
 
 

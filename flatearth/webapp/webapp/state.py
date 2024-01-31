@@ -11,16 +11,17 @@ class State(rx.State):
     place_name: str = ''
 
     user_name: str = ''
+    geoloc: dict[str, float] = {}
 
     @rx.var
     def ip(self) -> str:
         return self.router.session.client_ip
-
-    def set_place(self):
-        place = Place.loc(ip=self.ip)
-        self.place_data = place.data
-        self.place_json = place.json
-        self.place_name = place.name
+    
+    # def set_geoloc(self):
+    #     ip = self.ip
+    #     print(ip)
+    #     lat,lon = geo_ip(ip)
+    #     self.geoloc = {'lat':lat, 'lon':lon}
 
 
 class WindowState(rx.State):

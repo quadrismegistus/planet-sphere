@@ -8,7 +8,9 @@ def get_ipinfo_handler():
 
 
 def get_ipinfo(ip=None):
-    if ip in {'127.0.0.1'}: ip = None
+    if type(ip)!=str or ip in {'127.0.0.1'}: 
+        ip = None
+    
     try:
         res = get_ipinfo_handler().getDetails(ip)
         return res.details if res else {}

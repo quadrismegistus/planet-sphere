@@ -73,7 +73,19 @@ class Post(Base):
             likes=[u.to_dict() for u in self.likes],
         )
     
+    @classmethod
+    def iter_latest(cls, limit=10, replies=False, reposts=False):
+        i=0
+        for post in get_db_session().query(cls).order_by(-cls.timestamp):
+            if (replies or not post.is_reply) and (reposts or not post.is_repost):
+                yield post
+                i+=1
+                if i>=limit: break
+
     
+    @classmethod
+    def latest(cls, **kwargs):
+        return list(cls.iter_latest(**kwargs))
     
 
 
@@ -107,6 +119,11 @@ Post(
     @cached_property
     def datetime(self):
         return datetime.fromtimestamp(self.timestamp)
+    @cached_property
+    def ago(self):
+        delta=time.time() - self.timestamp
+        delta = delta//60*60 if delta>60 else int(delta)
+        return f'{format_timespan(delta)} ago'
 
 
     def translate_to(self, lang):
