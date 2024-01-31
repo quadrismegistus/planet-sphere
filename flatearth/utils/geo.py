@@ -104,10 +104,10 @@ def geo_parse_loc(loc, with_geodecode=False):
         'lon': loc.longitude
     }
 
-def random_lat_lon():
+def random_lat_lon(epsilon=1e-10):
     return (
-        random.uniform(-90, 90),
-        random.uniform(-180, 180)
+        random.uniform(-90 + epsilon, 90 - epsilon),
+        random.uniform(-180 + epsilon, 180 - epsilon)
     )
 
 
@@ -124,7 +124,7 @@ class Geocode:
     @classmethod
     @cache_obj.memoize()
     def decode(self, lat:float, lon:float, lang=DEFAULT_LANG, **kwargs):
-        return self.coder.reverse(
+        res = self.coder.reverse(
             query=(lat,lon),
             exactly_one=True,
             timeout=30,
@@ -133,6 +133,14 @@ class Geocode:
             namedetails=True,
             **kwargs
         )
+        if not res:
+            resd = reverse_geocode.get((lat,lon))
+            city,country = resd.get('city'),resd.get('country')
+            if city and country:
+                name=f'{city}, {country}'
+                res = self.encode(name)
+        return res
+
     
     @classmethod
     @cache_obj.memoize()
@@ -169,9 +177,16 @@ class Geocode:
     def loc(self):
         if not self._loc:
             if self._lat!=None and self._lon!=None:
-                self._loc = self.decode(self._lat, self._lon, lang=self.lang)
+                self._loc = self.decode(
+                    self._lat, 
+                    self._lon, 
+                    lang=self.lang
+                )
             elif self._placename:
-                self._loc = self.encode(self._placename, lang=self.lang)
+                self._loc = self.encode(
+                    self._placename, 
+                    lang=self.lang
+                )
             elif self._ip:
                 lat,lon = geo_ip(self._ip)
                 self._loc = self.decode(lat,lon,lang=self.lang)
@@ -180,17 +195,16 @@ class Geocode:
         return self._loc
         
     @property
-    def latlon(self):
-        return self.loc.latitude, self.loc.longitude
+    def lat(self): 
+        return self.loc.latitude if self.loc else self._lat
     @property
-    def lat(self): return self.latlon[0]
-    @property
-    def lon(self): return self.latlon[1]
+    def lon(self):
+        return self.loc.longitude if self.loc else self._lon
 
     
     @cached_property
     def address(self):
-        return self.loc.raw.get('address',{})
+        return self.loc.raw.get('address',{}) if self.loc else {}
     
     @property
     def city(self):
@@ -206,25 +220,26 @@ class Geocode:
     
     @property
     def address_type(self):
-        return self.loc.raw.get('addresstype','')
+        return self.loc.raw.get('addresstype','') if self.loc else ''
     
     @property
     def osm_type(self):
-        return self.loc.raw.get('osm_type','')
+        return self.loc.raw.get('osm_type','') if self.loc else ''
     @property
     def osm_id(self):
-        return self.loc.raw.get('osm_id','')
+        return self.loc.raw.get('osm_id','') if self.loc else ''
     @property
-    def osm_uri(self):
+    def uri(self):
         if self.osm_type and self.osm_id:
             return f'https://openstreetmap.org/{self.osm_type}/{self.osm_id}'
+        return ''
 
     @property
     def display_name(self):
-        return self.loc.raw.get('display_name','')
+        return self.loc.raw.get('display_name','') if self.loc else ''
     @cached_property
     def name_details(self):
-        return self.loc.raw.get('namedetails',{})
+        return self.loc.raw.get('namedetails',{}) if self.loc else {}
     @property
     def name_d(self):
         keys = [
@@ -261,11 +276,13 @@ class Geocode:
     @cached_property
     def safe(self):
         if self._safe: return self
-        return Geocode(
+        if not self.name: return self
+        geo = Geocode(
             placename=self.name,
             lang=self.lang,
             safe=True
         )
+        return geo if geo.loc else self
     
     @cached_property
     def can_be_safe(self, min_dist_km=1):
@@ -314,11 +331,24 @@ class Geocode:
     @property
     def data(self):
         return dict(
-            uri=self.osm_uri,
+            uri=self.uri,
             name=self.name,
             lat=self.lat,
             lon=self.lon,
-            **self.name_d
+            **{k:v for k,v in self.name_d.items() if v}
+        )
+    
+    @property
+    def point_str(self):
+        return f'POINT({self.lon} {self.lat})'
+
+    @property
+    def data_db(self):
+        return dict(
+            point=self.safe.point_str,
+            name=self.safe.name,
+            uri=self.safe.uri,
+            data_json=json.dumps(self.safe.data)
         )
     
 

@@ -5,18 +5,17 @@ class Place(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     point = Column(Geometry(geometry_type='POINT', srid=4326))
     name: Mapped[str]
-    country: Mapped[Optional[str]] = mapped_column(String(2))
+    uri: Mapped[Optional[str]]
+    # country: Mapped[Optional[str]] = mapped_column(String(2))
+    data_json: Mapped[Optional[str]]
 
     def to_dict(self):
         return super().to_dict(
-            name = self.name,
-            country = self.country,
-            lat = self.lat,
-            lon = self.lon
+            **self.data_json_d
         )
     
     @classmethod
-    def nearby(cls, lat, lon, ip=None, mindist_km=None):
+    def nearby(cls, lat, lon, ip=None, maxdist_km=None):
         if not lat or not lon: lat,lon=geo_ip(ip)
         if not lat or not lon: lat,lon = NULL_LAT,NULL_LON
         point = get_point(lat, lon)
@@ -26,50 +25,53 @@ class Place(Base):
                     point,
                 )):
             dist = place.dist_from(lat, lon)
-            if mindist_km and dist > mindist_km: break
+            if maxdist_km and dist > maxdist_km: break
             yield place, dist
 
     @classmethod
     @cache
-    def loc(cls, lat=None, lon=None, ip=None, placename=None, mindist_km=10):
-        if placename:
-            place = Place.get(name=placename)
-            if not place:
-                geo_d = geocode(placename)
-                place = Place.get(name=geo_d['name'])
-                if not place:
-                    place = Place.getc(**geo_d)
-        else:
-            if not lat or not lon: lat,lon = geo_ip(ip)
-            if not lat or not lon: return get_null_place()
-            places = cls.nearest(lat,lon,mindist_km=mindist_km)
-            if places: 
-                place = places[0][0]
-            else:
-                place = Place.getc(**geodecode(lat,lon))
+    def locate(self, lat=None, lon=None, ip=None, placename=None, maxdist_km=10):
+        geo = Geocode(
+            lat=lat,
+            lon=lon,
+            ip=ip,
+            placename=placename
+        )
+        place = self.nearest(lat,lon,maxdist_km=maxdist_km)
+        if not place:
+            if not geo.name:
+                return
+            place = Place.getc(**geo.data_db)
+        place._geo = geo
         return place
     
 
     def dist_from(self, lat, lon, metric='km'):
         try:
-            dist = geodesic((lon, lat), (self.lon, self.lat))
+            dist = geodesic((lat, lon), (self.lat, self.lon))
             return getattr(dist, metric)
         except ValueError as e:
-            print(e)
+            # print(e)
             return np.nan
 
     @cached_property
-    def latlon(self):
-        point = wkb.loads(self.point.data.tobytes())
-        return (point.y, point.x)
+    def data_json_d(self):
+        return json.loads(self.data_json)
 
     @property
-    def lat(self):
-        return self.latlon[0]
+    def lat(self): return self.data_json_d.get('lat')
+    @property
+    def lon(self): return self.data_json_d.get('lon')
+    @property
+    def city(self): return self.data_json_d.get('city','')
+    @property
+    def country(self): return self.data_json_d.get('country','')
 
     @property
-    def lon(self):
-        return self.latlon[1]
+    def geo(self):
+        if not hasattr(self,'_geo') or not self._geo:
+            self._geo = Geocode(placename=self.name)
+        return self._geo
 
     @cached_property
     def point_str(self):

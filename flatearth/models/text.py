@@ -11,6 +11,14 @@ class Txt(Base):
     translations: Mapped[List['Translation']] = relationship(
         back_populates='text'
     )
+
+    def to_dict(self):
+        d=super().to_dict()
+        d['translations']=[
+            tr.data
+            for tr in self.translations
+        ]
+        return d
     
     def translate_to(self, lang):
         if lang == self.lang: return self

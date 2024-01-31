@@ -2,6 +2,21 @@ from ..imports import *
 
 Base = declarative_base()
 
+@classmethod
+def iter(self):
+    yield from self.find()
+
+@classmethod
+def rand(self):
+    return random.choice(self.all())
+
+@classmethod
+def all(self):
+    return list(self.iter())
+
+@classmethod
+def _first(self):
+    for x in self.iter(): return x
 
 def save(self):
     self.ensure_table()
@@ -47,8 +62,14 @@ def ensure_table(self):
 
 
 @classmethod
-def nearest(cls, lat=None, lon=None, ip=None, n=25, **kwargs):
-    return list(itertools.islice(cls.nearby(lat=lat, lon=lat, ip=ip, **kwargs), n))
+def nearby_l(cls,*args,n=25,**kwargs):
+    return list(itertools.islice(cls.nearby(*args,**kwargs), n))
+
+@classmethod
+def nearest(cls,*args,**kwargs):
+    res = first(cls.nearby(*args,**kwargs))
+    return res[0] if res else res
+
 
 @classmethod
 def getc(cls, *x,**y):
@@ -69,7 +90,8 @@ def to_dict(self, **attrs):
     attrs = {'id':self.id, **(self.__dict__ if not attrs else attrs)}
     for k,v in attrs.items():
         if k[0]!='_' and v is not None:
-            d[self.__tablename__+'_'+k]=(v.to_dict() if isinstance(v,Base) else v)
+            d[k]=(v.to_dict() if isinstance(v,Base) else v)
+    d['_tbl']=self.__tablename__
     return d
 
 
@@ -80,11 +102,15 @@ Base.getc = getc
 Base.get_or_create = get_or_create
 Base.find = find
 Base.ensure_table = ensure_table
+Base.nearby_l = nearby_l
 Base.nearest = nearest
 Base.json = jsonx
 Base.data = data
 Base.to_dict = to_dict
-
+Base.iter = iter
+Base.all = all
+Base.first = _first
+Base.random = rand
 
 # rels
 post_liking = Table(

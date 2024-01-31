@@ -30,6 +30,7 @@ from humanfriendly import format_timespan
 import reverse_geocode
 from diskcache import Cache
 from geopy.geocoders import GeoNames
+from tqdm import tqdm
 
 
 PATH_DATA = os.path.expanduser('~/.cache/flatearth')
@@ -57,5 +58,7 @@ MAPBOX_ACCESS_TOKEN = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 
 GEONAMES_USERNAME = 'quadrismegistus'
 DEFAULT_LANG='en'
+WRAP_WIDTH=50
+
 
 from .utils import *

@@ -62,6 +62,37 @@ class Post(Base):
     def txt(self):
         return self.text.txt
 
+    @property
+    def html_tooltip1(post):
+        return (
+            f'<b>{wrap_html(trunc(post.txt,WRAP_WIDTH))}</b><br>'
+            f'&nbsp;<i>—{post.user.name}</i><br><br>'
+            f'{wrap_html(post.place.name)}<br>'
+            f'{post.ago} '
+            f'[id={post.id}]'
+        )
+    
+    @property
+    def html_tooltip2(post):
+        return (
+            f'{post.user.name}<br>'
+            f'{wrap_html(post.place.name)}<br>'
+            f'{post.ago} '
+            f'[id={post.id}]'
+        )
+    
+    @property
+    def html_tooltip(post):
+        return (
+            # f'{post.ago} in '
+            f'{post.place.name} '
+            f'[id={post.id}]',
+        )
+    
+    @property
+    def html(self):
+        return f'<h3>{self.user.name} !!</h3><o>{self.txt}</p>'
+
     def to_dict(self):
         return super().to_dict(
             timestamp=self.timestamp,
@@ -123,7 +154,7 @@ Post(
     def ago(self):
         delta=time.time() - self.timestamp
         delta = delta//60*60 if delta>60 else int(delta)
-        return f'{format_timespan(delta)} ago'
+        return f'{format_timespan(delta, max_units=1)} ago'
 
 
     def translate_to(self, lang):

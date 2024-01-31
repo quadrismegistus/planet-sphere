@@ -29,18 +29,24 @@ def test(clear=True):
     zuck.reply(post, 'good morning')
 
 
-    cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sidney']
+    cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sydney']
+
     for city in cities:
         user = User.getc(name=city.split()[0]+'Lover69')
         user.post(f'I love {city}!', placename=city)
 
-    for n in range(50):
+    for n in tqdm(list(range(1000))):
         lat,lon = random_lat_lon()
-        user.post(
-            f'Just posting again the {n}th time', 
+        random.choice(User.all()).post(
+            f'''Just posting again the {n}th time. Just enjoyed a peaceful afternoon at the park, watching the sunset and listening to my favorite playlist. 🌅🎶 It's moments like these that remind me to appreciate the simple things in life. #NatureLover #SunsetVibes. 🍃 Later, tried out a new recipe for homemade pizza - turned out pretty amazing! Who knew cooking could be this fun? 🍕😊 #HomeChef #CookingAdventures. Finally, wrapped up the day with a good book and some quiet time. #EveningReads #RelaxationMode. 📚✨ What’s your go-to activity for a chill day?''', 
             lat=lat, 
             lon=lon
         )
+
+    for n in tqdm(list(range(1000))):
+        u = User.random()
+        p = Post.random()
+        u.like(p)
     
     return repost
 

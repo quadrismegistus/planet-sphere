@@ -19,20 +19,30 @@ geoloc();
 """
 
 hover_js = """
-window.hover_html = ""
+window.hover_html = "";
 setInterval(
     function() {
         const els = window.document.getElementsByClassName('hoverlayer');
         if(els.length) {
             const html = els[0].innerHTML.trim();
-            if (html && (html != window.hover_html)) {
+            if ((html != window.hover_html)) {
                 window.hover_html = html;
-                console.log(html);
             }
         }
     },
     100
-)
+);
+
+window.mouseX = 0;
+window.mouseY = 0;
+
+function updateMouseLoc(event) {
+    window.mouseX = event.clientX;
+    window.mouseY = event.clientY;
+}
+
+document.addEventListener('mousemove', updateMouseLoc);
+
 """
 
 
@@ -82,21 +92,99 @@ def jiggle(lat_or_lon):
     num = -num if random.random()>.5 else num
     return lat_or_lon + num
 
+box_width=400
+box_height=400
+box_offset=10
+box_offset_h = box_offset*2
+
+class HoverState(rx.State):
+    hover_html: str = ''
+    hover_id: int = 0
+    hover_post_html: str = ''
+    mouseX: int = 0
+    mouseY: int = 0
+    screen_width: int = 800
+    screen_height: int = 600
+    box_left: int = 0
+    box_top: int=0
+    box_color: str = 'white'
+    box_display: str = 'none'
+
+    def set_hover_html(self, data):
+        hover_html,mouseX,mouseY,screen_width,screen_height = data
+        self.mouseX=mouseX
+        self.mouseY=mouseY
+        self.screen_width=screen_width
+        self.screen_height=screen_height
+        
+        if hover_html and hover_html!=self.hover_html:
+            hover_id = hover_html.split('[id=',1)[-1].split(']')[0]
+            if hover_id and hover_id.isdigit():
+                self.hover_id = int(hover_id)
+                post = Post.get(id=self.hover_id)
+                self.hover_post_html = post.html
+
+                maxW = self.screen_width - box_width - box_offset
+                maxH = self.screen_height - box_offset_h
+                thisW = self.mouseX + box_offset
+                thisH = self.mouseY + box_offset_h
+
+                self.box_left=thisW if thisW<maxW else maxW
+                self.box_top=thisH if thisH<maxH else maxH
+                rgb=hover_html.split('fill: rgb(',1)[-1].split(')')[0]
+                self.box_color=f'rgba({rgb},0.75)'
+                self.box_display='block'
+        elif not hover_html:
+            self.box_display='none'
+
+        self.hover_html = hover_html
+
+    def check_hover(self):
+        return rx.call_script(
+            "[window.hover_html, window.mouseX, window.mouseY, window.innerWidth, window.innerHeight]",
+            callback=HoverState.set_hover_html,
+        )
+    
+    # @rx.var
+    # def margin_left(self, box_width=400):
+    #     over = self.mouseX + box_width - self.screen_width
+    #     return -over if over else 0
+    
+    # @rx.var
+    # def margin_top(self, box_height=400):
+    #     over = self.mouseY + box_height - self.screen_height
+    #     return -over if over else 0
+
+
+
+    
+    
+    @rx.background
+    async def watch_hover(self):
+        while True:
+            async with self:
+                yield self.check_hover()
+            await asyncio.sleep(.1)
+
 class MapState(rx.State):
     fig: go.Figure = init_map()
     layout: dict = init_layout()
     geoloc: dict[str, float] = {'lat': 0.0, 'lon': 0.0}
     geolocated: bool = False
-    hover_html: str = ''
+    seen: set = set()
+    read: set = set()
 
-    def add_point(self, lat=None, lon=None):
+    def mark_read(self):
+        print('!!',HoverState.hover_html)
+
+    def add_point(self, lat=None, lon=None, trace_name=''):
         if lat is None or lon is None: return
-        fig = traces_removed(self.fig, {''})
+        fig = traces_removed(self.fig, {trace_name})
         fig.add_scattergeo(
             lat=[lat],
             lon=[lon],
             customdata=["You are here"],
-            name='',
+            name=trace_name,
             marker_size=10,
             hovertext=None,
             hoverinfo=None,
@@ -106,20 +194,18 @@ class MapState(rx.State):
             showlegend=False,
         )
         self.fig = fig
-        self.layout = init_layout(self.fig)
 
     def add_posts(self, posts=None, trace_name='latest'):
         if not posts: 
             from flatearth.models import Post
-            posts=Post.latest(limit=100)
+            posts=Post.latest(limit=1000)
         lats = [jiggle(post.place.lat) for post in posts]
         lons = [jiggle(post.place.lon) for post in posts]
+        sizes = [len(post.likes) for post in posts]
+        mins,maxs = min(sizes),max(sizes)
+        sizes = [translate_range(v,(mins,maxs),(10,25)) for v in sizes]
         customdatas = [
-            f'{post.user.name}:<br><br>'
-            f'<b>{post.txt}</b><br><br>'
-            f'{post.place.name}<br>'
-            f'{post.ago}<br>'
-            f'#{post.id}'
+            post.html_tooltip
             for post in posts
         ]
         fig = traces_removed(self.fig, {trace_name})
@@ -127,25 +213,20 @@ class MapState(rx.State):
             lat=lats,
             lon=lons,
             customdata=customdatas,
-            name=trace_name,
-            marker_size=10,
+            name='',
+            marker_size=sizes,
             hovertemplate="%{customdata}",
-            marker_color='#ecc853',
-            marker_symbol='circle-dot',
+            marker_color='#1a9549',
+            marker_symbol='circle-open',
             showlegend=False,
         )
         self.fig = fig
-        self.layout = init_layout(self.fig)
 
     def start_posts(self):
         self.add_posts()
 
-    @rx.var
-    def get_fig(self) -> go.Figure:
-        return self.fig
-
     def set_place(self):
-        place = Place.loc(ip=self.ip) 
+        place = Place.locate(ip=self.ip) 
         self.place_data = place.data
         self.place_json = place.json
         self.place_name = place.name
@@ -154,7 +235,7 @@ class MapState(rx.State):
         if geoloc and geoloc != self.geoloc:
             self.geoloc = geoloc
             self.geolocated = True
-            self.add_point(**geoloc)
+            self.add_point(trace_name='My location',**geoloc)
 
     def check_geolocation(self):
         return rx.call_script(
@@ -164,18 +245,14 @@ class MapState(rx.State):
 
     @rx.background
     async def watch_geolocation(self):
-        await asyncio.sleep(1) 
-        naptime=10
+        naptime=3
         i=0
         while True:
             async with self:
-                print(self.geoloc)
                 yield self.check_geolocation()
                 if self.geolocated:
                     break
             await asyncio.sleep(naptime)
-            i+=1
-            if i>=3: break
 
     def geolocate(self):
         lat,lon = geo_ip(self.router.session.client_ip,hostname_required=True)
@@ -192,11 +269,12 @@ def map_page() -> rx.Component:
         The UI for the home page.
     """
     rxfig = rx.plotly(
-        data=MapState.get_fig,
+        data=MapState.fig,
         layout=MapState.layout,
         # width=WindowState.screen_width_px,
         # height=WindowState.proportional_height_px,
         use_resize_handler=True,
+        on_click=MapState.mark_read,
     )
     rxfig._add_style({
         # 'width': WindowState.screen_width_px,
@@ -212,9 +290,28 @@ def map_page() -> rx.Component:
         rx.script(hover_js)
     ]
 
+    txtbox = rx.box(
+        rx.html(HoverState.hover_post_html),
+        position='absolute',
+        top=HoverState.box_top,
+        left=HoverState.box_left,
+        max_width=f'{box_width}px',
+        max_height=f'{box_height}px',
+        background_color=HoverState.box_color,
+        backdrop_filter='blur(5px)',
+        overflow_y='scroll',
+        border='1px solid black',
+        border_radius=styles.border_radius,
+        box_shadow=styles.box_shadow,
+        display=HoverState.box_display,
+        padding='.5rem',
+        font_size='.9rem',
+    )
+
     return rx.box(
         *scripts,
         rxfig,
+        txtbox,
         height='99dvh',
         # height='fit-content',
         width='99dvw',
@@ -226,7 +323,8 @@ def map_page() -> rx.Component:
         on_mount=[
             # MapState.geolocate, 
             MapState.watch_geolocation, 
-            MapState.start_posts
+            MapState.start_posts,
+            HoverState.watch_hover
         ],
         # border='1px dotted blue'
     )
