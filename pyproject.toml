@@ -29,5 +29,5 @@ flatearth = "flatearth.cli:run"
 packages = ['flatearth']
 
 [tool.setuptools.dynamic]
-version = {attr = "version.__version__"}
+version = {attr = "flatearth._version.__version__"}
 dependencies = {file = "requirements.txt"}
