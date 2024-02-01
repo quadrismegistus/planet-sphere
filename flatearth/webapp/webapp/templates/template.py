@@ -1,7 +1,6 @@
 """Common templates used between pages in the app."""
 
 from ..imports import *
-from ..components.sidebar import sidebar
 from ..components.header import header
 
 # Meta tags for the app.

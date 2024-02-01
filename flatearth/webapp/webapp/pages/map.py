@@ -15,7 +15,7 @@ def map_page() -> rx.Component:
         # width=WindowState.screen_width_px,
         # height=WindowState.proportional_height_px,
         use_resize_handler=True,
-        on_click=MapState.toggle_dark_mode,
+        on_click=HoverState.toggle_freeze_display,
     )
     rxfig._add_style({
         # 'width': WindowState.screen_width_px,
@@ -43,21 +43,6 @@ def map_page() -> rx.Component:
         padding='.5rem',
         font_size='.9rem',
     )
-
-    btn = rx.button(
-        rx.image(
-            src='/darkmode.svg',
-            height="3rem",
-            padding=".5rem",
-            alt='ok'
-        ),
-        aria_label='test',
-        on_click=MapState.toggle_dark_mode,
-        margin_top='50px',
-        padding=0,
-        variant='link'
-    )
-
     return rx.box(
         rx.script(scripts.geoloc_js),
         rx.script(scripts.hover_js),
@@ -71,7 +56,7 @@ def map_page() -> rx.Component:
         top=0,
         left=0,
         align_items='top',
-        on_click=MapState.toggle_dark_mode,
+        on_click=HoverState.toggle_freeze_display,
         on_mount=[
             # MapState.geolocate, 
             MapState.watch_geolocation, 

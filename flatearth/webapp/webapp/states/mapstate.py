@@ -46,10 +46,14 @@ class MapState(ColorState):
 
 
     def toggle_dark_mode(self):
-        res = super().toggle_dark_mode()
+        self.darkmode = not self.darkmode 
         self.fig = self.fig.update_geos(**self.map_colors)
         self.layout = init_layout(self.fig)
-        return res
+        return rx.call_script(
+            f'document.body.style.backgroundColor="{self.bgcolor}"; ' 
+        )
+
+        
         
 
     

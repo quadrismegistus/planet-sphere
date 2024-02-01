@@ -13,8 +13,11 @@ class HoverState(rx.State):
     screen_width: int = 800
     screen_height: int = 600
     box_display:str='none'
+    freeze_display:bool = False
 
     def set_hover_json(self, data):
+        if self.freeze_display: return
+        
         hover_json,mouseX,mouseY,screen_width,screen_height = data
         self.mouseX=mouseX
         self.mouseY=mouseY
@@ -24,6 +27,9 @@ class HoverState(rx.State):
         self.hover_json = hover_json
         if hover_json:
             self.hover_dict = from_json64(hover_json)
+
+    def toggle_freeze_display(self):
+        self.freeze_display = not self.freeze_display
 
     @rx.var
     def hover_post_html(self):
@@ -35,7 +41,7 @@ class HoverState(rx.State):
     
     @rx.var
     def box_left(self):
-        maxW = self.screen_width - box_width - box_offset
+        maxW = self.screen_width - box_offset
         thisW = self.mouseX + box_offset
         return thisW if thisW<maxW else maxW
     

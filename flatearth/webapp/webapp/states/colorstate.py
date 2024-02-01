@@ -4,16 +4,33 @@ from ..styles import *
 DARK_MODE_DEFAULT = False
 
 class ColorState(rx.State):
-    darkmode: bool = False
-    map_colors: dict = map_colors_dark if DARK_MODE_DEFAULT else map_colors_dark
-    bgcolor: dict = bgcolor_dark if DARK_MODE_DEFAULT else bgcolor_light
+    darkmode: bool = DARK_MODE_DEFAULT
+
+    @rx.var
+    def map_colors(self) -> dict:
+        return map_colors_dark if self.darkmode else map_colors_light
+    
+    @rx.var
+    def bgcolor(self) -> str:
+        return bgcolor_dark if self.darkmode else bgcolor_light
+    
+    @rx.var
+    def classname(self) -> str:
+        return 'color_inverted' if self.darkmode else 'color_normal'
+    
+    @rx.var
+    def filter(self) -> str:
+        return 'color_inverted' if self.darkmode else 'color_normal'
+    
+    @rx.var
+    def text_color(self):
+        return 'white' if self.darkmode else 'black'
+    
+    @rx.var
+    def invert_filter(self):
+        return 'invert(100%)' if self.darkmode else 'invert(0%)'
 
     def toggle_dark_mode(self):
-        dm = self.darkmode = not self.darkmode
-        self.map_colors=map_colors_dark if dm else map_colors_light
-        self.bgcolor = bgcolor_dark if dm else bgcolor_light
-        return rx.call_script(
-            f'document.body.style.backgroundColor="{self.bgcolor}"; ' 
-            f'console.log("{self.bgcolor}"); '
-        )
+        self.darkmode = not self.darkmode
+        
         
