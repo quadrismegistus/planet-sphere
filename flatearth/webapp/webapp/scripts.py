@@ -42,5 +42,16 @@ function updateMouseLoc(event) {
 }
 
 document.addEventListener('mousemove', updateMouseLoc);
+document.body.style.overflow = 'hidden';
+
+var style = document.createElement('style');
+style.innerHTML = `
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+`;
+document.head.appendChild(style);
 
 """

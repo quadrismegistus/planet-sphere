@@ -18,7 +18,7 @@ def icon_btnlink(
                 src=f'/{icon_name}.svg' if not icon_path else icon_path,
                 height=icon_height,
                 padding=icon_padding,
-                filter=ColorState.invert_filter,
+                # filter=ColorState.invert_filter,
                 **icon_kwargs
             ),
             variant=button_variant,

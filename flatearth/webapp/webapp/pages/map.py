@@ -55,7 +55,7 @@ def map_page() -> rx.Component:
         margin_left='auto',
         position='absolute',
         right=0,
-        top='3rem'
+        top=0
     )
 
 
@@ -65,15 +65,15 @@ def map_page() -> rx.Component:
         rx.script(scripts.hover_js),
         # btn,
         rxfig,
-        projs,
+        # projs,
         txtbox,
-        height='99dvh',
+        height='100dvh',
         # height='fit-content',
-        width='99dvw',
+        width='100dvw',
         position='absolute',
         top=0,
         left=0,
-        margin_top='2rem',
+        margin_top='3rem',
         align_items='top',
         on_click=HoverState.toggle_freeze_display,
         on_mount=[

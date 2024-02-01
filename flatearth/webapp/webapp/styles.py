@@ -71,8 +71,9 @@ base_style = {
     },
     rx.MenuItem: hover_accent_bg,
     '.modebar-container':{'display':'none'},
-    'body':{'background_color':'black'},
+    'body':{'background_color':'black', 'overflow':'hidden'},
     '.hoverlayer':{'display':'none'},
+    'body::-webkit-scrollbar':{'display': 'none'} 
 }
 
 markdown_style = {
