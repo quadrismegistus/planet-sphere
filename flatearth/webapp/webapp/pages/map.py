@@ -43,11 +43,29 @@ def map_page() -> rx.Component:
         padding='.5rem',
         font_size='.9rem',
     )
+
+    projs = rx.box(
+        rx.select(
+            [x.title() for x in projections],
+            placeholder="Select a projection",
+            on_change=MapState.set_projection,
+            default_value=PROJECTION.title()
+        ),
+        width='10rem',
+        margin_left='auto',
+        position='absolute',
+        right=0,
+        top='3rem'
+    )
+
+
+
     return rx.box(
         rx.script(scripts.geoloc_js),
         rx.script(scripts.hover_js),
         # btn,
         rxfig,
+        projs,
         txtbox,
         height='99dvh',
         # height='fit-content',
@@ -55,6 +73,7 @@ def map_page() -> rx.Component:
         position='absolute',
         top=0,
         left=0,
+        margin_top='2rem',
         align_items='top',
         on_click=HoverState.toggle_freeze_display,
         on_mount=[

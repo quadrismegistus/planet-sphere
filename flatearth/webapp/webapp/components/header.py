@@ -13,7 +13,8 @@ def header() -> rx.Component:
     
     sitename = rx.heading(
         'flat earth', 
-        font_family='serif', 
+        font_family='Courier', 
+        font_weight='normal',
         font_size='1.75rem',
         padding_x='1rem',
         letter_spacing='.1em',
