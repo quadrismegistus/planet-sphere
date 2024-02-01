@@ -178,7 +178,7 @@ class Geocode:
         self._safe=safe
     
 
-    @cached_property
+    @property
     def loc(self):
         if not self._loc:
             if self._lat!=None and self._lon!=None:
@@ -209,39 +209,39 @@ class Geocode:
     def latlon(self):
         return (self.lat,self.lon)
     
-    @cached_property
+    @property
     def address(self):
         return self.loc.raw.get('address',{}) if self.loc else {}
-    @cached_property
+    @property
     def extratags(self):
         return self.loc.raw.get('extratags',{}) if self.loc else {}
     @property
     def wikidata(self):
-        return self.extratags.get('wikidata','')
+        return self.extratags.get('wikidata','') if self.extratags else ''
     @property
     def population(self):
-        return int(self.extratags.get('population',0))
+        return int(self.extratags.get('population',0)) if self.extratags else ''
     @property
     def default_lang(self):
-        return self.extratags.get('default_language','')
+        return self.extratags.get('default_language','') if self.extratags else ''
     @property
     def local_name(self):
         return self.name_details.get(
             f'name:{self.default_lang}',
             ''
-        )
+        ) if self.name_details else ''
 
     @property
     def city(self):
-        return self.address.get('city','')
+        return self.address.get('city','') if self.address else ''
     
     @property
     def country(self):
-        return self.address.get('country','')
+        return self.address.get('country','') if self.address else ''
     
     @property
     def country_code(self):
-        return self.address.get('country_code','').upper()
+        return self.address.get('country_code','').upper() if self.address else ''
     
     @property
     def address_type(self):
@@ -262,7 +262,7 @@ class Geocode:
     @property
     def display_name(self):
         return self.loc.raw.get('display_name','') if self.loc else ''
-    @cached_property
+    @property
     def name_details(self):
         return self.loc.raw.get('namedetails',{}) if self.loc else {}
     @property
@@ -301,7 +301,7 @@ class Geocode:
             return self.name_details['int_name']
         return self.display_name
     
-    @cached_property
+    @property
     def safe(self):
         if self._safe: return self
         if not self.name: return self
@@ -312,19 +312,19 @@ class Geocode:
         )
         return geo if geo.loc else self
     
-    @cached_property
+    @property
     def can_be_safe(self, min_dist_km=1):
         if self._safe: return True
         if {self._lat,self._lon} == {None}: return True
         return self.safe_dist_km >= min_dist_km
     
-    @cached_property
+    @property
     def is_safe(self, min_dist_km=1):
         if self._safe: return True
         if {self._lat,self._lon} == {None}: return True
         return self.dist_km >= min_dist_km
     
-    @cached_property
+    @property
     def dist_km(self):
         if None in {self._lat, self._lat}:
             return np.nan
@@ -332,7 +332,7 @@ class Geocode:
             dist = self.dist_from(self._lat, self._lon)
             return dist.km
     
-    @cached_property
+    @property
     def safe_dist_km(self):
         if None in {self._lat, self._lat}:
             return np.nan

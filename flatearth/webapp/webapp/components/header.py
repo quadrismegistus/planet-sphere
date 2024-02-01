@@ -76,7 +76,8 @@ def header() -> rx.Component:
                 'flat earth', 
                 font_family='cursive', 
                 font_size='2rem',
-                padding_x='1rem'
+                padding_x='1rem',
+                color='#555555',
             ),
             rx.spacer(),
 

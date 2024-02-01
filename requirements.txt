@@ -20,3 +20,5 @@ humanfriendly
 diskcache
 tqdm
 logmap
+orjson
+colour

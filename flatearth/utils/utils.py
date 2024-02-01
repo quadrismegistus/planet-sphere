@@ -55,3 +55,41 @@ def translate_range(value, original_range, new_range):
     translated_value = (value - x) / (y - x) * (y2 - x2) + x2
 
     return translated_value
+
+def to_json(x, as_str=True):
+    o=orjson.dumps(
+        x, 
+        option=orjson.OPT_SERIALIZE_NUMPY|orjson.OPT_SERIALIZE_UUID
+    )
+    return o.decode('utf-8') if as_str else o
+
+def from_json(x):
+    return orjson.loads(x)
+
+def to_json64(x):
+    x_json_b = to_json(x,as_str=False)
+    x_json_b64 = b64encode(x_json_b)
+    x_json_b64_str = x_json_b64.decode('utf-8')
+    return x_json_b64_str
+
+def from_json64(x_json_b64_str):
+    x_json_b64 = x_json_b64_str.encode('utf-8')
+    x_json_b = b64decode(x_json_b64)
+    x = orjson.loads(x_json_b)
+    return x
+
+
+# Function to interpolate between two colors
+def interpolate_color(start_color, end_color, fraction):
+    # Ensure the fraction is between 0 and 1
+    fraction = max(0, min(1, fraction))
+    
+    # Interpolate between the RGB values of the start and end colors
+    new_color = colour.Color(
+        rgb=[
+            start_color.rgb[0] + (end_color.rgb[0] - start_color.rgb[0]) * fraction,
+            start_color.rgb[1] + (end_color.rgb[1] - start_color.rgb[1]) * fraction,
+            start_color.rgb[2] + (end_color.rgb[2] - start_color.rgb[2]) * fraction,
+        ]
+    )
+    return new_color

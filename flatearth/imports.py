@@ -8,7 +8,7 @@ from typing import *
 # from sqlmodel import Field, Session, SQLModel, create_engine, select, Column
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import Session, Mapped, mapped_column, relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from geoalchemy2 import Geometry
 from sqlalchemy import create_engine, func
 from sqlalchemy_utils import database_exists, create_database
@@ -32,6 +32,9 @@ from diskcache import Cache
 from geopy.geocoders import GeoNames
 from tqdm import tqdm
 import pickle
+import orjson
+import colour
+
 
 PATH_DATA = os.path.expanduser('~/.cache/flatearth')
 os.makedirs(PATH_DATA,exist_ok=True)

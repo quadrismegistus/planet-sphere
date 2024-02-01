@@ -9,7 +9,7 @@ class Place(Base):
 
     def to_dict(self):
         return super().to_dict(
-            **self.data_json_d
+            **self.geo.data
         )
     
     @classmethod

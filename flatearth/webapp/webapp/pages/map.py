@@ -2,6 +2,28 @@
 from ..imports import *
 from flatearth.utils.mapping import *
 
+bgcolor_dark='black'
+bgcolor_light='white'
+
+
+map_colors_dark = dict(
+    countrycolor='rgba(255,255,255,0.15)',
+    landcolor='#324D36',
+    coastlinecolor='rgba(0,0,0,0.5)',
+    oceancolor="#121A3D",
+    bgcolor='rgba(0,0,0,0)'
+)
+
+map_colors_light = dict(
+    countrycolor='rgba(255,255,255,0.15)',
+    landcolor='darkseagreen',
+    coastlinecolor='rgba(0,0,0,0.5)',
+    oceancolor="lightskyblue",
+    bgcolor='rgba(0,0,0,0)'
+)
+
+
+
 geoloc_js = """
 async function geoloc() {
     window.geoloc = {'lat':0.0, 'lon':0.0};
@@ -19,14 +41,18 @@ geoloc();
 """
 
 hover_js = """
-window.hover_html = "";
+
+document.body.style.backgroundColor='black';
+
+window.hover_json = "";
 setInterval(
     function() {
         const els = window.document.getElementsByClassName('hoverlayer');
         if(els.length) {
-            const html = els[0].innerHTML.trim();
-            if ((html != window.hover_html)) {
-                window.hover_html = html;
+            const el = els[0];
+            const txt = el.textContent;
+            if(txt!=window.hover_json) {
+                window.hover_json = txt;
             }
         }
     },
@@ -54,19 +80,20 @@ def init_map() -> go.Figure:
         visible=True,
         showframe=False,
         # resolution=50,
-        showcountries=False,
+        showcountries=True,
         showcoastlines=True,
-        showland=False,
-        showocean=False,
+        showland=True,
+        showocean=True,
         showrivers=False,
         showlakes=False,
-        landcolor='darkseagreen',
-        coastlinecolor='#666666',
-        countrycolor="#c7c7c7",
-        rivercolor="#b4d4ff",
-        oceancolor="lightblue",
-        projection_type='baker')
+        projection_type='baker',
+        **map_colors_dark
+    )
     relayout_fig(fig)
+    fig.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+    )
     return fig
 
 
@@ -99,51 +126,50 @@ box_offset=5
 box_offset_h = box_offset
 
 class HoverState(rx.State):
-    hover_html: str = ''
-    hover_id: int = 0
-    hover_post_html: str = ''
+    hover_json: str = ''
+    hover_dict: dict = {}
     mouseX: int = 0
     mouseY: int = 0
     screen_width: int = 800
     screen_height: int = 600
-    box_left: int = 0
-    box_top: int=0
-    box_color: str = 'white'
-    box_display: str = 'none'
+    box_display:str='none'
 
-    def set_hover_html(self, data):
-        hover_html,mouseX,mouseY,screen_width,screen_height = data
+    def set_hover_json(self, data):
+        hover_json,mouseX,mouseY,screen_width,screen_height = data
         self.mouseX=mouseX
         self.mouseY=mouseY
         self.screen_width=screen_width
         self.screen_height=screen_height
-        
-        if hover_html and hover_html!=self.hover_html:
-            hover_id = hover_html.split('[id=',1)[-1].split(']')[0]
-            if hover_id and hover_id.isdigit():
-                self.hover_id = int(hover_id)
-                post = Post.get(id=self.hover_id)
-                self.hover_post_html = post.html
+        self.box_display = 'block' if hover_json else 'none'
+        self.hover_json = hover_json
+        if hover_json:
+            self.hover_dict = from_json64(hover_json)
 
-                maxW = self.screen_width - box_width - box_offset
-                maxH = self.screen_height - box_offset_h
-                thisW = self.mouseX + box_offset
-                thisH = self.mouseY + box_offset_h
+    @rx.var
+    def hover_post_html(self):
+        return f'''
+<h3>{self.hover_dict['user']['name']}</h3>
+<p>{self.hover_dict['text']['txt']}</p>
+<p>{self.hover_dict['place']['name']}</p>
+        ''' if self.hover_dict else ''
+    
+    @rx.var
+    def box_left(self):
+        maxW = self.screen_width - box_width - box_offset
+        thisW = self.mouseX + box_offset
+        return thisW if thisW<maxW else maxW
+    
+    @rx.var
+    def box_top(self):
+        maxH = self.screen_height - box_offset_h
+        thisH = self.mouseY + box_offset_h
+        return thisH if thisH<maxH else maxH
 
-                self.box_left=thisW if thisW<maxW else maxW
-                self.box_top=thisH if thisH<maxH else maxH
-                rgb=hover_html.split('fill: rgb(',1)[-1].split(')')[0]
-                self.box_color=f'rgba({rgb},0.75)'
-                self.box_display='block'
-        elif not hover_html:
-            self.box_display='none'
-
-        self.hover_html = hover_html
 
     def check_hover(self):
         return rx.call_script(
-            "[window.hover_html, window.mouseX, window.mouseY, window.innerWidth, window.innerHeight]",
-            callback=HoverState.set_hover_html,
+            "[window.hover_json, window.mouseX, window.mouseY, window.innerWidth, window.innerHeight]",
+            callback=HoverState.set_hover_json,
         )
     
     # @rx.var
@@ -174,9 +200,23 @@ class MapState(rx.State):
     geolocated: bool = False
     seen: set = set()
     read: set = set()
+    darkmode: bool = True
 
-    def mark_read(self):
-        print('!!',HoverState.hover_html)
+    def toggle_dark_mode(self):
+        self.darkmode = not self.darkmode
+        colors = (
+            map_colors_dark
+            if self.darkmode
+            else map_colors_light
+        )
+        bgcolor = bgcolor_dark if self.darkmode else bgcolor_light
+        self.fig = self.fig.update_geos(**colors)
+        self.layout = init_layout(self.fig)
+        return rx.call_script(
+            f'document.body.style.backgroundColor="{bgcolor}"; ' 
+            f'console.log("{bgcolor}"); '
+        )
+
 
     def add_point(self, lat=None, lon=None, trace_name=''):
         if lat is None or lon is None: return
@@ -203,11 +243,37 @@ class MapState(rx.State):
         lats = [jiggle(post.place.lat) for post in posts]
         lons = [jiggle(post.place.lon) for post in posts]
         sizes = [len(post.likes) for post in posts]
-        colors = [post.place.geo.country_color for post in posts]
+        
+        timestamps=[post.timestamp for post in posts]
+        mint,maxt=min(timestamps),max(timestamps)
+        recencys=[
+            translate_range(
+                post.timestamp,
+                (mint,maxt),
+                (0,1)
+            )
+            for post in posts
+        ]
+
+        color1,color2=colour.Color('orange'),colour.Color('blue')
+        # color1.set_luminance(0.5)
+        # color2.set_luminance(0.75)
+        colors = [
+            interpolate_color(color1,color2,recency).hex
+            for recency in recencys
+        ]
+
+        # colors = [post.place.geo.country_color for post in posts]
         mins,maxs = min(sizes),max(sizes)
-        sizes = [translate_range(v,(mins,maxs),(10,25)) for v in sizes]
+        sizes = [
+            translate_range(
+                v,
+                (mins,maxs),
+                (5,20)
+            ) for v in sizes
+        ]
         customdatas = [
-            post.html_tooltip
+            post.json64
             for post in posts
         ]
         fig = traces_removed(self.fig, {trace_name})
@@ -220,10 +286,10 @@ class MapState(rx.State):
             hovertemplate="%{customdata}",
             # marker_color='#1a9549',
             marker_color=colors,
-            marker_symbol='circle',
-            marker_opacity=.25,
+            marker_symbol='square-open',
+            marker_opacity=1,
             marker_line_width=2,
-            marker_line_color='#888888',
+            # marker_line_color='#888888',
             showlegend=False,
         )
         self.fig = fig
@@ -280,7 +346,6 @@ def map_page() -> rx.Component:
         # width=WindowState.screen_width_px,
         # height=WindowState.proportional_height_px,
         use_resize_handler=True,
-        on_click=MapState.mark_read,
     )
     rxfig._add_style({
         # 'width': WindowState.screen_width_px,
@@ -305,7 +370,7 @@ def map_page() -> rx.Component:
         max_height=f'{box_height}px',
         background_color='rgba(255,255,255,0.666)',
         backdrop_filter='blur(5px)',
-        overflow_y='scroll',
+        # overflow_y='scroll',
         border='1px solid black',
         border_radius=styles.border_radius,
         box_shadow=styles.box_shadow,
@@ -314,8 +379,15 @@ def map_page() -> rx.Component:
         font_size='.9rem',
     )
 
+    btn = rx.button(
+        'toggle dark mode',
+        on_click=MapState.toggle_dark_mode,
+        margin_top='50px'
+    )
+
     return rx.box(
         *scripts,
+        btn,
         rxfig,
         txtbox,
         height='99dvh',
