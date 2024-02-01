@@ -67,3 +67,24 @@ def plot_map2() -> go.Figure:
     )
 
     return fig
+
+
+def traces_removed(fig, bad_trace_names:set):
+    return go.Figure(
+        data=[
+            trace 
+            # for trace,name in zip(
+            #     fig.data, 
+            #     fig.__trace_names()
+            # ) 
+            for trace in fig.data
+            if trace.name not in bad_trace_names
+        ],
+        layout=fig.layout
+    )
+
+def jiggle(lat_or_lon):
+    num = random.random() / 10
+    num = -num if random.random()>.5 else num
+    return lat_or_lon + num
+

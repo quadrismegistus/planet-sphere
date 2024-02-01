@@ -1,7 +1,6 @@
 """Sidebar component for the app."""
 
 from ..imports import *
-from ..state import State
 
 def header_item(text: str, icon: str, url: str) -> rx.Component:
     """Sidebar item.

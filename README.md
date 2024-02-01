@@ -30,3 +30,10 @@ python -m venv venv
 pip install -e .
 
 ```
+
+
+
+## Attribution
+
+* Icons
+  * darkmode by Tim Rostilov from <a href="https://thenounproject.com/browse/icons/term/darkmode/" target="_blank" title="darkmode Icons">Noun Project</a> (CC BY 3.0)

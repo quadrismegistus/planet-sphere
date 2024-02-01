@@ -1,4 +1,4 @@
-from .imports import *
+from ..imports import *
 from flatearth.utils import geodecode
 from flatearth.models import *
 
@@ -18,7 +18,7 @@ class State(rx.State):
         return self.router.session.client_ip
     
     # def set_geoloc(self):
-    #     ip = self.ip
+    #     ip = self.ipl
     #     print(ip)
     #     lat,lon = geo_ip(ip)
     #     self.geoloc = {'lat':lat, 'lon':lon}
