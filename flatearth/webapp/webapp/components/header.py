@@ -12,7 +12,7 @@ def header() -> rx.Component:
     """
     
     sitename = rx.heading(
-        'flatearth', 
+        rx.link('flatearth',href='/'), 
         font_family='Courier', 
         font_weight='normal',
         font_size='1.75rem',
@@ -24,20 +24,23 @@ def header() -> rx.Component:
     
     darkmode_btn = icon_link('darkmode',on_click=MapState.toggle_dark_mode)
     user_btn = icon_link('account-avatar-head',href='/account')
-    map_btn = icon_link('map-location-pin', href='/')
+    # map_btn = icon_link('map-location-pin', href='/')
 
     return rx.vstack(
         rx.hstack(
             sitename,
-            # rx.spacer(),
-            map_btn,
+            # map_btn,
             user_btn,
             darkmode_btn,
+            # rx.spacer(),
         ),
         width="100%",
         padding_y=".5rem",
         z_index=100,
         height='3rem',
-        border_bottom='1px solid #cdcdcd',
-        filter=ColorState.invert_filter
+        # border_bottom='1px solid #cdcdcd',
+        filter=ColorState.invert_filter,
+        backdrop_filter='blur(5px)',
+        background_color='rgb(250,250,250)'
+
     )

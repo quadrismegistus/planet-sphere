@@ -73,7 +73,8 @@ base_style = {
     '.modebar-container':{'display':'none'},
     'body':{'background_color':'black', 'overflow':'hidden'},
     '.hoverlayer':{'display':'none'},
-    'body::-webkit-scrollbar':{'display': 'none'} 
+    'body::-webkit-scrollbar':{'display': 'none'},
+    'a:hover':{'text_decoration':'none'}
 }
 
 markdown_style = {

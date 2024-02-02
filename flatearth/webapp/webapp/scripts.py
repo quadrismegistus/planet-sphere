@@ -46,11 +46,9 @@ document.body.style.overflow = 'hidden';
 
 var style = document.createElement('style');
 style.innerHTML = `
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
+  a:hover { 
+    text-decoration: none !important; 
   }
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
 `;
 document.head.appendChild(style);
 

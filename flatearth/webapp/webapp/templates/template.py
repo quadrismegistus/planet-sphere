@@ -115,7 +115,9 @@ def template(
                 align_items="flex-start",
                 # transition="left 0.5s, width 0.5s",
                 position="relative",
-                on_mount=[])
+                on_mount=[],
+                background_color=ColorState.bgcolor
+            )
 
         return templated_page
 

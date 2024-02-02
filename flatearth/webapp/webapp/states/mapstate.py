@@ -57,9 +57,10 @@ class MapState(ColorState):
         self.darkmode = not self.darkmode 
         self.fig = self.fig.update_geos(**self.map_colors)
         self.layout = init_layout(self.fig)
-        return rx.call_script(
-            f'document.body.style.backgroundColor="{self.bgcolor}"; ' 
-        )
+        self.store_opt('darkmode',self.darkmode)
+        # return rx.call_script(
+        #     f'document.body.style.backgroundColor="{self.bgcolor}"; ' 
+        # )
 
         
         

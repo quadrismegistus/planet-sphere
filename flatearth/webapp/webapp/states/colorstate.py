@@ -5,6 +5,16 @@ DARK_MODE_DEFAULT = False
 
 class ColorState(rx.State):
     darkmode: bool = DARK_MODE_DEFAULT
+    opts_json: str = rx.LocalStorage('{}')
+
+    def init(self):
+        print(f'default darkmode = {DARK_MODE_DEFAULT}')
+        if self.opts_json:
+            opts = from_json(str(self.opts_json))
+            darkmode = opts.get('darkmode',self.darkmode)
+            print(f'booted darkmode = {self.darkmode}')
+            if darkmode != self.darkmode: 
+                return self.toggle_dark_mode()
 
     @rx.var
     def map_colors(self) -> dict:
@@ -30,7 +40,12 @@ class ColorState(rx.State):
     def invert_filter(self):
         return 'invert(100%)' if self.darkmode else 'invert(0%)'
 
+    def store_opt(self, key, val):
+        opts = from_json(str(self.opts_json))
+        opts[key] = val
+        self.opts_json = to_json(opts)
+
     def toggle_dark_mode(self):
         self.darkmode = not self.darkmode
-        
-        
+        self.store_opt('darkmode',self.darkmode)
+        print(self.opts_json)

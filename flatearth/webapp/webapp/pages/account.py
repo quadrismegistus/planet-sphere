@@ -10,5 +10,5 @@ def account_page() -> rx.Component:
         The UI for the dashboard page.
     """    
     return rx.vstack(
-        rx.heading("Users", font_size="3em"),
+        rx.heading("Users", font_size="3em"), background_color=ColorState.bgcolor
     )
