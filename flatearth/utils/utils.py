@@ -64,7 +64,7 @@ def to_json(x, as_str=True):
     return o.decode('utf-8') if as_str else o
 
 def from_json(x):
-    return orjson.loads(x)
+    return orjson.loads(str(x) if type(x)!=bytes else x)
 
 def to_json64(x):
     x_json_b = to_json(x,as_str=False)

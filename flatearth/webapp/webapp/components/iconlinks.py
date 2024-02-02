@@ -1,4 +1,5 @@
 from ..imports import *
+from .basecomponent import *
 
 def icon_btnlink(
     icon_name, 

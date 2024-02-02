@@ -2,6 +2,7 @@
 
 from ..imports import *
 from .iconlinks import *
+from .account import *
 
 def header() -> rx.Component:
     """
@@ -22,8 +23,15 @@ def header() -> rx.Component:
         # color=ColorState.text_color
     )
     
-    darkmode_btn = icon_link('darkmode',on_click=MapState.toggle_dark_mode)
-    user_btn = icon_link('account-avatar-head',href='/account')
+    
+    user_btn = icon_link(
+        'account-avatar-head',
+        on_click=LoginModalState.toggle_is_open
+    )
+    darkmode_btn = icon_link(
+        'darkmode',
+        on_click=MapState.toggle_dark_mode
+    )
     # map_btn = icon_link('map-location-pin', href='/')
 
     return rx.vstack(
@@ -34,6 +42,7 @@ def header() -> rx.Component:
             darkmode_btn,
             # rx.spacer(),
         ),
+        login_modal(),
         width="100%",
         padding_y=".5rem",
         z_index=100,
@@ -41,6 +50,6 @@ def header() -> rx.Component:
         # border_bottom='1px solid #cdcdcd',
         filter=ColorState.invert_filter,
         backdrop_filter='blur(5px)',
-        background_color='rgb(250,250,250)'
+        background_color='rgb(255,255,255)'
 
     )
