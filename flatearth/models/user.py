@@ -6,6 +6,7 @@ class User(Base):
     __tablename__ = 'user'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
+    passhash: Mapped[bytes]
     posts: Mapped[List['Post']] = relationship(back_populates='user')
     following = relationship(
         'User', 
@@ -19,6 +20,43 @@ class User(Base):
         secondary=lambda: post_liking, 
         back_populates="likes"
     )
+
+    @classmethod
+    def register(self, name:str, password:str):
+        # no password
+        if not password:
+            raise Exception('no password given')
+
+        # name exists?
+        if self.has(name=name):
+            raise Exception('user already exists')
+
+        # create
+        return self.create(
+            name=name,
+            passhash=hash_password(password)
+        )
+    
+    @classmethod
+    def login(self, name:name, password:str):
+        # valid input?
+        if not name or not password:
+            raise Exception('name and pw not given')
+        
+        # name exists?
+        user = self.get(name=name)
+        if not user:
+            raise Exception('user does not exists')
+        
+        # password ok?
+        if not check_password(password, user.passhash):
+            raise Exception('password not matching')
+
+        return user
+
+        
+        
+
 
 
     @cached_property

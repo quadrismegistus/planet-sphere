@@ -93,3 +93,20 @@ def interpolate_color(start_color, end_color, fraction):
         ]
     )
     return new_color
+
+def hash_password(plain_text_password:str) -> bytes:
+    # Generate a salt
+    salt = bcrypt.gensalt()
+    # Hash the password along with the salt
+    hashed_password = bcrypt.hashpw(
+        plain_text_password.encode('utf-8'),
+        salt
+    )
+    return hashed_password
+
+def check_password(plain_text_password, hashed_password):
+    # Check if the given plain text password matches the hashed password
+    return bcrypt.checkpw(
+        plain_text_password.encode('utf-8'), 
+        hashed_password
+    )

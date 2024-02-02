@@ -64,6 +64,10 @@ class Base(SQLBase):
     @classmethod
     def get(cls, **kwargs):
         return cls.query_by_attr(**kwargs).first()
+    
+    @classmethod
+    def has(cls, **kwargs):
+        return bool(cls.get(**kwargs))
 
     @classmethod
     def get_or_create(cls, **kwargs):
