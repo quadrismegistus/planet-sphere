@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore')
 import asyncio
 from pprint import pprint
 import random
@@ -34,8 +36,8 @@ from geopy.geocoders import GeoNames
 from tqdm import tqdm
 import pickle
 import orjson
-import colour
-from logmap import logmap
+from colour import Color, RGB_color_picker
+from logmap import logmap, logger
 import jwt
 from datetime import datetime, timedelta
 

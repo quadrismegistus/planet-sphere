@@ -59,6 +59,28 @@ class Post(Base):
         return bool(self.reply_to)
     
     @property
+    def forward_related_posts(self):
+        relposts=set()
+        if self.reply_to: 
+            relposts|={self.reply_to}|self.reply_to.related_posts
+        if self.repost_of:
+            relposts|={self.repost_of}|self.repost_of.related_posts
+        return relposts
+    
+    @property
+    def backward_related_posts(self):
+        relposts=set()
+        for reply in self.replies:
+            relposts|={reply}|reply.related_posts
+        for repost in self.reposts:
+            relposts|={repost}|repost.related_posts
+        return relposts
+    
+    @property
+    def related_posts(self):
+        return self.forward_related_posts
+
+    @property
     def txt(self):
         return self.text.txt
 

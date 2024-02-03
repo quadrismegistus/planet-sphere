@@ -9,6 +9,11 @@ class UserState(LocationState):
     token: str = ''
     logged_in:bool = False
 
+    @rx.var
+    def user_id(self) -> int:
+        res = self.login_from_token()
+        return res.get('sub') if res else 0
+
     def init(self):
         data=from_json(self.json)
         self.username=data.get('username','')
@@ -17,11 +22,13 @@ class UserState(LocationState):
             self.login_from_token()
 
     def login_from_token(self):
+        if not self.token: return False
         try:
             res = jwt.decode(self.token, SECRET_KEY, algorithms=["HS256"])
             self.logged_in = True
             return res
-        except jwt.ExpiredSignatureError:
+        except (jwt.DecodeError,jwt.ExpiredSignatureError) as e:
+            print('!!',e)
             self.logged_in=False
             return False
 

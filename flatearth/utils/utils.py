@@ -58,14 +58,22 @@ def translate_range(value, original_range, new_range=(0,1)):
         return new_range[1]
 
 def to_json(x, as_str=True):
-    o=orjson.dumps(
-        x, 
-        option=orjson.OPT_SERIALIZE_NUMPY|orjson.OPT_SERIALIZE_UUID
-    )
-    return o.decode('utf-8') if as_str else o
+    try:
+        o=orjson.dumps(
+            x, 
+            option=orjson.OPT_SERIALIZE_NUMPY|orjson.OPT_SERIALIZE_UUID
+        )
+        return o.decode('utf-8') if as_str else o
+    except TypeError as e:
+        logger.error(e)
+        pprint(x)
 
 def from_json(x):
-    return orjson.loads(str(x) if type(x)!=bytes else x)
+    try:
+        return orjson.loads(str(x) if type(x)!=bytes else x)
+    except Exception as e:
+        logger.error(e)
+        pprint(x)
 
 def to_json64(x):
     x_json_b = to_json(x,as_str=False)
@@ -86,7 +94,7 @@ def interpolate_color(start_color, end_color, fraction):
     fraction = max(0, min(1, fraction))
     
     # Interpolate between the RGB values of the start and end colors
-    new_color = colour.Color(
+    new_color = Color(
         rgb=[
             start_color.rgb[0] + (end_color.rgb[0] - start_color.rgb[0]) * fraction,
             start_color.rgb[1] + (end_color.rgb[1] - start_color.rgb[1]) * fraction,

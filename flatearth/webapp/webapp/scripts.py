@@ -41,7 +41,7 @@ setInterval(
         if(els.length) {
             const el = els[0];
             const txt = el.textContent;
-            if(txt!=window.hover_json) {
+            if(txt && (txt!=window.hover_json)) {
                 window.hover_json = txt;
                 window.hover_key = "";
             }

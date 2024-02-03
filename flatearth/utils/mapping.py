@@ -1,4 +1,5 @@
 from ..imports import *
+from .utils import interpolate_color, translate_range, to_json
 import plotly.graph_objects as go
 px.set_mapbox_access_token(MAPBOX_ACCESS_TOKEN)
 
@@ -119,13 +120,31 @@ def plot_map2() -> go.Figure:
     return fig
 
 
-def traces_removed(fig, bad_trace_names:Optional[set]=None, good_trace_names:Optional[set]=None):
+def traces_removed(
+        fig:go.Figure, 
+        bad_trace_names:Optional[set]=None, 
+        good_trace_names:Optional[set]=None,
+        bad_trace_startswith:Optional[str]=None,
+        bad_trace_endswith:Optional[str]=None,
+        ):
+    
+    if bad_trace_names: 
+        bad_trace_names={str(x) for x in bad_trace_names}
+    if good_trace_names: 
+        good_trace_names={str(x) for x in good_trace_names}
+    if bad_trace_startswith != None: 
+        bad_trace_startswith=str(bad_trace_startswith)
+    if bad_trace_endswith != None: 
+        bad_trace_endswith=str(bad_trace_endswith)
     return go.Figure(
         data=[
             trace 
             for trace in fig.data
-            if (not bad_trace_names or trace.name not in bad_trace_names)
+            if trace.name
+            and (not bad_trace_names or trace.name not in bad_trace_names)
             and (not good_trace_names or trace.name in good_trace_names)
+            and (not bad_trace_startswith or not trace.name.startswith(bad_trace_startswith))
+            and (not bad_trace_endswith or not trace.name.endswith(bad_trace_endswith))
         ],
         layout=fig.layout
     )
@@ -136,30 +155,49 @@ def jiggle(lat_or_lon):
     return lat_or_lon + num
 
 
-def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, max_size=20):
-    if not posts:
-        from flatearth.models import Post
-        posts = Post.latest()
-    
-    def post_d(post):
-        return dict(
-            id=post.id,
-            lat=post.place.lat,
-            lon=post.place.lon,
-            timestamp=post.timestamp,
-            num_likes = len(post.likes),
-            data = post.json
-        )
+def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, max_size=20, jiggle_positions=False):
+    from flatearth.models import Post
+    if not posts: posts = Post.latest()
+
+    posts_ld=[]
+    def add_post(post):
+        posts_ld.append(dict(
+            id=post['id'],
+            user_id=post['user']['id'],
+            lat=post['place']['lat'],
+            lon=post['place']['lon'],
+            timestamp=post['timestamp'],
+            num_likes=len(post['likes']),
+            data=to_json(post),
+            reply_to=post.get('reply_to',{}).get('id',0),
+            repost_of=post.get('repost_of',{}).get('id',0)
+        ))
+
+    def related_posts(postd, keys=['reply_to','repost_of']):
+        relposts={}
+        for key in keys:
+            if postd.get(key): 
+                relposts[postd[key]['id']]=postd[key]
+                relposts={**relposts, **related_posts(postd[key])}
+        return relposts
+
+    for post in posts:
+        post = dict(post.data) if isinstance(post,Post) else post
+        add_post(post)
+        others = related_posts(post).values()
+        for postx in others:
+            add_post(postx)
     
     def norm(s:pd.Series):
         return (s-s.min()) / (s.max() - s.min()) if (s.max() - s.min()) else np.nan
 
-    df = pd.DataFrame(post_d(post) for post in posts)
+    df = pd.DataFrame(posts_ld).drop_duplicates('id')
     if len(df):
-        color1,color2=colour.Color(from_color),colour.Color(to_color)
-        df['color'] = norm(df['timestamp']).apply(
-            lambda t: interpolate_color(color1,color2,t).hex
-        )
+        color1,color2=Color(from_color),Color(to_color)
+        # df['color'] = norm(df['timestamp']).apply(
+        #     lambda t: interpolate_color(color1,color2,t).hex
+        # )
+        df['color']=df['user_id'].apply(get_color)
 
         s=df['num_likes']
         df['size'] = s.apply(
@@ -170,4 +208,13 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, ma
             )
         )
     
+    if jiggle_positions:
+        df['lat']=df['lat'].apply(jiggle)
+        df['lon']=df['lon'].apply(jiggle)
+
     return df
+
+def get_color(name):
+    color = RGB_color_picker(name)
+    color.set_saturation(1)
+    return color.hex

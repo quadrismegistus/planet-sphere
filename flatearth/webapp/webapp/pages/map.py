@@ -13,7 +13,7 @@ def map_page() -> rx.Component:
         data=MapState.fig,
         layout=MapState.layout,
         use_resize_handler=True,
-        on_click=HoverState.toggle_freeze_display,
+        on_click=HoverState.clear_hover,
         on_context_menu=HoverState.alert
     )
     rxfig._add_style({
@@ -24,13 +24,15 @@ def map_page() -> rx.Component:
     })
 
     txtbox = rx.box(
-        rx.html(HoverState.hover_post_html),
+        rx.vstack(
+            rx.html(HoverState.hover_html)
+        ),
         position='absolute',
         top=HoverState.box_top,
         left=HoverState.box_left,
         max_width=f'{box_width}px',
         max_height=f'{box_height}px',
-        background_color='rgba(255,255,255,0.666)',
+        background_color='rgba(255,255,255,1)',
         backdrop_filter='blur(5px)',
         # overflow_y='scroll',
         border='1px solid black',
@@ -71,15 +73,16 @@ def map_page() -> rx.Component:
         left=0,
         padding_top='3rem',
         align_items='top',
-        on_click=HoverState.toggle_freeze_display,
+        on_click=HoverState.clear_hover,
         on_mount=[
             MapState.clear_traces,
             MapState.geolocate, 
             MapState.watch_geolocation, 
-            MapState.start_posts,
-            HoverState.watch_hover,
+            MapState.watch_posts,
+            # HoverState.watch_hover,
             MapState.init,
-            MapState.watch_map_darkmode
+            MapState.watch_map_darkmode,
+            FeedState.check_feed
         ],
         background_color=MapState.bgcolor
         # border='1px dotted blue'

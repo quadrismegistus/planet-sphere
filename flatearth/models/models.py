@@ -2,6 +2,7 @@ from .place import *
 from .user import *
 from .text import *
 from .post import *
+from .feed import *
 
 
 demoposts = [
@@ -28,7 +29,7 @@ def test(clear=True):
     # post.translate_to('fr')
 
     zuck.post('Good morning', placename='Palo Alto')
-    elon.post('I am an idiot', placename='San Francisco')
+    elon.post('I am an idiot')
 
     elon.follow(marx)
     elon.follow(zuck)
@@ -39,9 +40,8 @@ def test(clear=True):
 
     repost = elon.repost(post, 'lol')
 
-    zuck.reply(repost, 'what?')
-    zuck.reply(post, 'good morning')
-
+    zuck.reply(repost, 'what?', placename='Palo Alto')
+    zuck.reply(post, 'good morning', placename='Palo Alto')
 
     cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sydney']
 
@@ -49,15 +49,20 @@ def test(clear=True):
         user = User.register(name=city.split()[0]+'Lover69', password=city)
         user.post(f'I love {city}!', placename=city)
 
-    for n in tqdm(list(range(100))):
+    for n in tqdm(list(range(50))):
         lat,lon = random_lat_lon()
-        User.random().post(
+        post = User.random().post(
             random.choice(demoposts), 
             lat=lat, 
             lon=lon
         )
 
     for n in tqdm(list(range(100))):
+        u = User.random()
+        p = Post.random()
+        u.reply(p, 'wtf are you talking about', placename=Place.random().name)
+
+    for n in tqdm(list(range(1000))):
         u = User.random()
         p = Post.random()
         u.like(p)

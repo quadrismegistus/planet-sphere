@@ -57,7 +57,14 @@ class Base(SQLBase):
         if not kwargs:
             return query
         else:
-            qconds = [(getattr(cls, key) == val) for key, val in kwargs.items()]
+            qconds = [
+                (
+                    getattr(cls, key) == val
+                    if type(val) not in {list,set,tuple}
+                    else getattr(cls, key).in_(set(val))
+                )
+                for key, val in kwargs.items()
+            ]
             return query.filter(and_(*qconds))
 
 

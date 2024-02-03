@@ -8,44 +8,66 @@ box_offset=5
 box_offset_h = box_offset
 
 class HoverState(MapState):
-    hover_json: str = ''
-    hover_dict: dict = {}
+    hover_id: str = ''
     mouseX: int = 0
     mouseY: int = 0
     screen_width: int = 800
     screen_height: int = 600
     box_display:str='none'
-    freeze_display:bool = False
+    marked_read: bool = False
+    hover_html: str = ''
 
     def set_hover_json(self, data):
-        if self.freeze_display: return
+        hover_id0,mouseX,mouseY,screen_width,screen_height,hover_key = data
+        hover_id=hover_id0.strip().split('_')[0]
+        if hover_id.isdigit():
+            if hover_id!=self.hover_id:
+                logger.debug(f'focusing new post: {hover_id} [{hover_id0}]')
+                self.hover_id=hover_id
+                self.box_display = 'block'
+                self.mouseX=mouseX
+                self.mouseY=mouseY
+                self.screen_width=screen_width
+                self.screen_height=screen_height
+                self.marked_read=False
+                
+                with logmap('making html'):
+                    hover_dict=self.posts_on_map.get(hover_id,{})
+                    if not hover_dict: 
+                        logger.error(f'no data for post {self.hover_id}')
+                    else:
+                        self.hover_html=f'''
+                            <h3>{hover_dict['user']['name']}</h3>
+                            <p>{hover_dict['text']['txt']}</p>
+                            <p>{hover_dict['place']['name']}</p>
+                        '''
+
+
         
-        hover_json,mouseX,mouseY,screen_width,screen_height,hover_key = data
-        self.mouseX=mouseX
-        self.mouseY=mouseY
-        self.screen_width=screen_width
-        self.screen_height=screen_height
-        
-        if hover_json:
-            hover_json='{'+hover_json.split('{',1)[-1]
-            if not hover_json.startswith('{'+LOC_TRACE_NAME):
-                if hover_json!=self.hover_json:
-                    try:
-                        hover_data = from_json(hover_json)
-                        self.box_display = 'block'
-                        self.hover_json = hover_json
-                        self.hover_dict = hover_data
-                        self.box_display='block'
-                    except orjson.JSONDecodeError as e:
-                        print('!!',e)
-                        print([hover_json])
-                if hover_key=='d':
-                    self.remove_point(self.hover_dict['id'])
-        else:
-            self.box_display='none'
-            self.hover_json=''
+        if (
+            not self.marked_read 
+            and self.hover_id
+            and hover_key=='d'
+            ):
+            post_id=int(self.hover_id)
+            self.hover_id=''
             self.hover_key=''
             self.hover_dict={}
+            self.marked_read=True
+            self.box_display='none'
+
+            self.mark_read(post_id)
+            self.remove_point(post_id)
+            
+            
+
+    def clear_hover(self):
+        self.marked_read=False
+        self.box_display='none'
+        self.hover_id=''
+        self.hover_key=''
+        self.hover_dict={}
+
 
     def toggle_freeze_display(self):
         if self.box_display=='block':
@@ -53,19 +75,8 @@ class HoverState(MapState):
         else:
             self.freeze_display = False
 
-    def remove_point(self, id=0):
-        self.fig = traces_removed(self.fig, bad_trace_names={str(id)})
-
     def alert(self):
         return rx.window_alert('What???')
-
-    @rx.var
-    def hover_post_html(self):
-        return f'''
-<h3>{self.hover_dict['user']['name']}</h3>
-<p>{self.hover_dict['text']['txt']}</p>
-<p>{self.hover_dict['place']['name']}</p>
-        ''' if self.hover_dict else ''
     
     @rx.var
     def box_left(self):
@@ -104,5 +115,6 @@ class HoverState(MapState):
     async def watch_hover(self):
         while True:
             async with self:
-                yield self.check_hover()
+                with logmap('checking hover'):
+                    yield self.check_hover()
             await asyncio.sleep(.1)
