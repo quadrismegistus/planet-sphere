@@ -2,11 +2,6 @@
 from ..imports import *
 
 
-class LoginModalState(rx.State):
-    is_open: bool = False
-
-    def toggle_is_open(self):
-        self.is_open = not self.is_open
 
 class FormStateUsername(rx.State):
     username: str = ''
@@ -16,14 +11,8 @@ class FormStateUsername(rx.State):
         return self.username and len(self.username)<MIN_USERNAME_LEN
 
 
-def login_modal() -> rx.Component:
-    """The dashboard page.
-
-    Returns:
-        The UI for the dashboard page.
-    """    
-
-    content_do_login = rx.modal_body(
+def login_modal_body() -> rx.Component:
+    return rx.modal_body(
         rx.form(
             rx.vstack(
                 rx.hstack(
@@ -59,42 +48,47 @@ def login_modal() -> rx.Component:
         )
     )
 
-    content_logged_in = rx.modal_body(
+def loggedin_modal_body() -> rx.Component:
+    return rx.modal_body(
         rx.vstack(
             rx.text(f'You are logged in as {UserState.username}.'),
             rx.button('Logout', on_click=UserState.handle_logout)
         )
     )
 
+def login_modal() -> rx.Component:
+    """The dashboard page.
+
+    Returns:
+        The UI for the dashboard page.
+    """    
+
+    
+
+    
+
     return rx.box(
         rx.modal(
             rx.modal_overlay(
                 rx.modal_content(
                     rx.modal_header("login/register"),
-                    rx.cond(UserState.logged_in, content_logged_in, content_do_login),
-                    rx.modal_footer(
-                        # rx.button(
-                        #     "Close", 
-                        #     on_click=LoginModalState.toggle_is_open
-                        # )
-                    ),
+                    rx.cond(UserState.logged_in, loggedin_modal_body(), login_modal_body()),
                 )
             ),
-            is_open=LoginModalState.is_open,
+            is_open=ModalStates.login_is_open,
             close_on_esc=True,
             close_on_overlay_click=True,
             return_focus_on_close=True,
             auto_focus=True,
             block_scroll_on_mount=False,
-            on_close=LoginModalState.toggle_is_open
+            on_close=ModalStates.toggle_login_is_open
         ),
     )
 
 
-class LocationModalState(rx.State):
-    is_open: bool = False
-    def toggle_is_open(self):
-        self.is_open = not self.is_open
+
+
+
 
 
 def location_modal() -> rx.Component:
@@ -111,13 +105,56 @@ def location_modal() -> rx.Component:
                     ),
                 ),
             ),
-            is_open=LocationModalState.is_open,
+            is_open=ModalStates.location_is_open,
             close_on_esc=True,
             close_on_overlay_click=True,
             return_focus_on_close=True,
             auto_focus=True,
             block_scroll_on_mount=False,
-            on_close=LocationModalState.toggle_is_open
+            on_close=ModalStates.toggle_location_is_open
         ),
     )
 
+
+
+
+
+
+
+def post_modal() -> rx.Component:
+    return rx.box(
+        rx.modal(
+            rx.modal_overlay(
+                rx.modal_content(
+                    rx.modal_header(
+                        rx.cond(
+                            UserState.logged_in,
+                            "post",
+                            "login/register",
+                        )
+                    ),
+                    rx.cond(
+                        UserState.logged_in, 
+                        post_modal_body(), 
+                        login_modal_body()
+                    ),
+                )
+            ),
+            is_open=ModalStates.posting_is_open,
+            close_on_esc=True,
+            close_on_overlay_click=True,
+            return_focus_on_close=True,
+            auto_focus=True,
+            block_scroll_on_mount=False,
+            on_close=ModalStates.toggle_posting_is_open
+        ),
+    )
+
+def post_modal_body() -> rx.Component:
+    return rx.form(
+            rx.vstack(
+                rx.text_area(name='post'),
+                rx.button("submit", type_="submit"),
+            ),
+        on_submit=UserState.handle_post
+    )

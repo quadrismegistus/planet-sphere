@@ -119,16 +119,13 @@ def plot_map2() -> go.Figure:
     return fig
 
 
-def traces_removed(fig, bad_trace_names:set):
+def traces_removed(fig, bad_trace_names:Optional[set]=None, good_trace_names:Optional[set]=None):
     return go.Figure(
         data=[
             trace 
-            # for trace,name in zip(
-            #     fig.data, 
-            #     fig.__trace_names()
-            # ) 
             for trace in fig.data
-            if trace.name not in bad_trace_names
+            if (not bad_trace_names or trace.name not in bad_trace_names)
+            and (not good_trace_names or trace.name in good_trace_names)
         ],
         layout=fig.layout
     )
@@ -139,3 +136,38 @@ def jiggle(lat_or_lon):
     return lat_or_lon + num
 
 
+def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, max_size=20):
+    if not posts:
+        from flatearth.models import Post
+        posts = Post.latest()
+    
+    def post_d(post):
+        return dict(
+            id=post.id,
+            lat=post.place.lat,
+            lon=post.place.lon,
+            timestamp=post.timestamp,
+            num_likes = len(post.likes),
+            data = post.json
+        )
+    
+    def norm(s:pd.Series):
+        return (s-s.min()) / (s.max() - s.min()) if (s.max() - s.min()) else np.nan
+
+    df = pd.DataFrame(post_d(post) for post in posts)
+    if len(df):
+        color1,color2=colour.Color(from_color),colour.Color(to_color)
+        df['color'] = norm(df['timestamp']).apply(
+            lambda t: interpolate_color(color1,color2,t).hex
+        )
+
+        s=df['num_likes']
+        df['size'] = s.apply(
+            lambda n: translate_range(
+                n, 
+                (s.min(), s.max()),
+                (min_size,max_size)
+            )
+        )
+    
+    return df

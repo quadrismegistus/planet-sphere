@@ -6,6 +6,10 @@ class LocationState(ColorState):
     geolocated: bool = False
     place_data: dict = {}
 
+    @rx.var
+    def lat(self): return self.geoloc.get('lat',0)
+    @rx.var
+    def lon(self): return self.geoloc.get('lon',0)
 
     @rx.var
     def placename(self) -> str:

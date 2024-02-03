@@ -117,8 +117,10 @@ class User(Base):
         from .feed import Feed
         return Feed(self)
     
-    # def to_dict(self):
-    #     return super().
+    def to_dict(self):
+        d=super().to_dict()
+        del d['passhash']
+        return d
 
 
 

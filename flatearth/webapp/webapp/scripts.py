@@ -23,7 +23,6 @@ watcher = setIntervalAsync(
                 }
             );
         }
-        console.log(window.geolocated, window.geoloc);
     },
     500
 );
@@ -35,6 +34,7 @@ watcher = setIntervalAsync(
 hover_js = """
 
 window.hover_json = "";
+window.hover_key = "";
 setInterval(
     function() {
         const els = window.document.getElementsByClassName('hoverlayer');
@@ -43,6 +43,7 @@ setInterval(
             const txt = el.textContent;
             if(txt!=window.hover_json) {
                 window.hover_json = txt;
+                window.hover_key = "";
             }
         }
     },
@@ -74,5 +75,11 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
     systemColorScheme = event.matches ? "dark" : "light";
 });
 
+document.addEventListener('keydown', function(event) {
+    const key = event.key; // "a", "1", "Shift", etc.
+    if(key=="d") {
+        window.hover_key=key;
+    }
+});
 
 """

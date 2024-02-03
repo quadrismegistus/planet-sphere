@@ -1,7 +1,8 @@
 from ..imports import *
 from flatearth.models import User, UserNotExist
+from .locstate import LocationState
 
-class UserState(rx.State):
+class UserState(LocationState):
     json: dict = rx.LocalStorage('{}')
     username: str = ''
     error: str = ''
@@ -17,12 +18,10 @@ class UserState(rx.State):
 
     def login_from_token(self):
         try:
-            decoded_payload = jwt.decode(self.token, SECRET_KEY, algorithms=["HS256"])
-            # Proceed if no exception is raised
+            jwt.decode(self.token, SECRET_KEY, algorithms=["HS256"])
             self.logged_in = True
             return True
         except jwt.ExpiredSignatureError:
-            # Handle the expired token case
             self.logged_in=False
             return False
 
@@ -80,3 +79,13 @@ class UserState(rx.State):
         self.token=''
         self.logged_in=False
         self.store_opts(username='',token='')
+
+    def handle_post(self, data):
+        if self.login_from_token():
+            user = User.get(name=self.username)
+            post = data.get('post','')
+            user.post(
+                txt=post, 
+                lat=self.lat,
+                lon=self.lon, 
+            )

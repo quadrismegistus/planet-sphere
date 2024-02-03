@@ -20,12 +20,12 @@ demoposts = [
 
 def test(clear=True):
     ensure_db_tables(clear=clear)
-    marx = User.getc(name='marx')
-    elon = User.getc(name='elon')
-    zuck = User.getc(name='zuck')
+    marx = User.register(name='marx',password='rocks')
+    zuck = User.register(name='zuck',password='sucks')
+    elon = User.register(name='elon',password='suxxx')
     
     post = marx.post('Guten morgen', placename='Trier')
-    post.translate_to('fr')
+    # post.translate_to('fr')
 
     zuck.post('Good morning', placename='Palo Alto')
     elon.post('I am an idiot', placename='San Francisco')
@@ -46,7 +46,7 @@ def test(clear=True):
     cities = ['Rio de Janeiro', 'Bogota', 'Budapest', 'Berlin', 'Hong Kong', 'Tokyo', 'Sydney']
 
     for city in tqdm(cities):
-        user = User.getc(name=city.split()[0]+'Lover69')
+        user = User.register(name=city.split()[0]+'Lover69', password=city)
         user.post(f'I love {city}!', placename=city)
 
     for n in tqdm(list(range(100))):

@@ -1,11 +1,13 @@
 from ..imports import *
+from .mapstate import MapState
+from flatearth.utils.mapping import traces_removed
 
 box_width=400
 box_height=400
 box_offset=5
 box_offset_h = box_offset
 
-class HoverState(rx.State):
+class HoverState(MapState):
     hover_json: str = ''
     hover_dict: dict = {}
     mouseX: int = 0
@@ -18,25 +20,40 @@ class HoverState(rx.State):
     def set_hover_json(self, data):
         if self.freeze_display: return
         
-        hover_json,mouseX,mouseY,screen_width,screen_height = data
+        hover_json,mouseX,mouseY,screen_width,screen_height,hover_key = data
         self.mouseX=mouseX
         self.mouseY=mouseY
         self.screen_width=screen_width
         self.screen_height=screen_height
         
         if hover_json:
-            try:
-                hover_data = from_json64(hover_json)
-                self.box_display = 'block'
-                self.hover_json = hover_json
-                self.hover_dict = hover_data
-            except orjson.JSONDecodeError:
-                pass
+            hover_json='{'+hover_json.split('{',1)[-1]
+            if hover_json!=self.hover_json:
+                try:
+                    hover_data = from_json(hover_json)
+                    self.box_display = 'block'
+                    self.hover_json = hover_json
+                    self.hover_dict = hover_data
+                    self.box_display='block'
+                except orjson.JSONDecodeError as e:
+                    print('!!',e)
+                    print([hover_json])
+            if hover_key=='d':
+                self.remove_point(self.hover_dict['id'])
         else:
             self.box_display='none'
 
     def toggle_freeze_display(self):
-        self.freeze_display = not self.freeze_display
+        if self.box_display=='block':
+            self.freeze_display = not self.freeze_display
+        else:
+            self.freeze_display = False
+
+    def remove_point(self, id=0):
+        self.fig = traces_removed(self.fig, bad_trace_names={str(id)})
+
+    def alert(self):
+        return rx.window_alert('What???')
 
     @rx.var
     def hover_post_html(self):
@@ -61,7 +78,7 @@ class HoverState(rx.State):
 
     def check_hover(self):
         return rx.call_script(
-            "[window.hover_json, window.mouseX, window.mouseY, window.innerWidth, window.innerHeight]",
+            "[window.hover_json, window.mouseX, window.mouseY, window.innerWidth, window.innerHeight, window.hover_key]",
             callback=HoverState.set_hover_json,
         )
     

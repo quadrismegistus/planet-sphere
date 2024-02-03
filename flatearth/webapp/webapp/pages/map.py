@@ -12,14 +12,11 @@ def map_page() -> rx.Component:
     rxfig = rx.plotly(
         data=MapState.fig,
         layout=MapState.layout,
-        # width=WindowState.screen_width_px,
-        # height=WindowState.proportional_height_px,
         use_resize_handler=True,
         on_click=HoverState.toggle_freeze_display,
+        on_context_menu=HoverState.alert
     )
     rxfig._add_style({
-        # 'width': WindowState.screen_width_px,
-        # 'height': WindowState.proportional_height_px,
         'width':'100%',
         'height':'100%',
         'margin': 0,
@@ -68,7 +65,6 @@ def map_page() -> rx.Component:
         # projs,
         txtbox,
         height='100dvh',
-        # height='fit-content',
         width='100dvw',
         position='absolute',
         top=0,
@@ -77,6 +73,7 @@ def map_page() -> rx.Component:
         align_items='top',
         on_click=HoverState.toggle_freeze_display,
         on_mount=[
+            MapState.clear_traces,
             MapState.geolocate, 
             MapState.watch_geolocation, 
             MapState.start_posts,

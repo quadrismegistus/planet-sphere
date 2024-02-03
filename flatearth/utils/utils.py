@@ -47,14 +47,15 @@ def trunc(x,n=100):
     return x[:n]+'...' if len(x)>n else x
 
 
-def translate_range(value, original_range, new_range):
+def translate_range(value, original_range, new_range=(0,1)):
     (x, y) = original_range
     (x2, y2) = new_range
 
     # Translate the value
-    translated_value = (value - x) / (y - x) * (y2 - x2) + x2
-
-    return translated_value
+    try:
+        return (value - x) / (y - x) * (y2 - x2) + x2
+    except ZeroDivisionError:
+        return new_range[1]
 
 def to_json(x, as_str=True):
     o=orjson.dumps(
@@ -110,3 +111,10 @@ def check_password(plain_text_password, hashed_password):
         plain_text_password.encode('utf-8'), 
         hashed_password
     )
+
+def is_valid_json(x):
+    try:
+        from_json(x)
+        return True
+    except Exception:
+        return False
