@@ -1,5 +1,5 @@
 from ..imports import *
-from .utils import interpolate_color, translate_range, to_json
+from .utils import *
 import plotly.graph_objects as go
 px.set_mapbox_access_token(MAPBOX_ACCESS_TOKEN)
 
@@ -160,15 +160,26 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, ma
     if not posts: posts = Post.latest()
 
     posts_ld=[]
+
+    def html_post(post):
+        return (
+            f'<b>{post['place']['name']}</b><br>'
+            f'{wrap_html(post['text']['txt'])}<br>'
+            f'&nbsp;<i>—{post['user']['name']}</i><br>'
+            f'{how_long_ago(post['timestamp'])} '
+        )
+
     def add_post(post):
         posts_ld.append(dict(
             id=post['id'],
             user_id=post['user']['id'],
             lat=post['place']['lat'],
             lon=post['place']['lon'],
+            place=post['place']['name'],
             timestamp=post['timestamp'],
             num_likes=len(post['likes']),
             data=to_json(post),
+            html=html_post(post),
             reply_to=post.get('reply_to',{}).get('id',0),
             repost_of=post.get('repost_of',{}).get('id',0)
         ))

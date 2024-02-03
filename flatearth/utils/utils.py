@@ -126,3 +126,8 @@ def is_valid_json(x):
         return True
     except Exception:
         return False
+    
+def how_long_ago(timestamp):
+    delta=time.time() - timestamp
+    delta = delta//60*60 if delta>60 else int(delta)
+    return f'{format_timespan(delta, max_units=1)} ago'

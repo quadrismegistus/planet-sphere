@@ -53,7 +53,7 @@ base_style = {
     rx.MenuItem: hover_accent_bg,
     '.modebar-container':{'display':'none'},
     'body':{'background_color':'black', 'overflow':'hidden'},
-    '.hoverlayer':{'display':'none'},
+    # '.hoverlayer':{'display':'none'},
     'body::-webkit-scrollbar':{'display': 'none'},
     'a:hover':{'text_decoration':'none'}
 }

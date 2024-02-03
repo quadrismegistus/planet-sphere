@@ -40,10 +40,14 @@ setInterval(
         const els = window.document.getElementsByClassName('hoverlayer');
         if(els.length) {
             const el = els[0];
-            const txt = el.textContent;
-            if(txt && (txt!=window.hover_json)) {
-                window.hover_json = txt;
-                window.hover_key = "";
+            const txts = el.getElementsByTagName("text");   
+            if(txts.length==2) {
+                const txt1 = txts[0].innerHTML;
+                const txt2 = txts[1].innerHTML;
+                if(txt1 && (txt1!=window.hover_json)) {
+                    window.hover_json = txt1;
+                    window.hover_key = "";
+                }
             }
         }
     },
