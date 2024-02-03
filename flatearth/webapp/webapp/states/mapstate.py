@@ -4,7 +4,6 @@ from flatearth.utils.mapping import *
 from .colorstate import ColorState
 from .locstate import LocationState
 
-LOC_TRACE_NAME='My location'
 
 class MapState(LocationState):
     fig: go.Figure = init_map()

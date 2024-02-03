@@ -28,20 +28,24 @@ class HoverState(MapState):
         
         if hover_json:
             hover_json='{'+hover_json.split('{',1)[-1]
-            if hover_json!=self.hover_json:
-                try:
-                    hover_data = from_json(hover_json)
-                    self.box_display = 'block'
-                    self.hover_json = hover_json
-                    self.hover_dict = hover_data
-                    self.box_display='block'
-                except orjson.JSONDecodeError as e:
-                    print('!!',e)
-                    print([hover_json])
-            if hover_key=='d':
-                self.remove_point(self.hover_dict['id'])
+            if not hover_json.startswith('{'+LOC_TRACE_NAME):
+                if hover_json!=self.hover_json:
+                    try:
+                        hover_data = from_json(hover_json)
+                        self.box_display = 'block'
+                        self.hover_json = hover_json
+                        self.hover_dict = hover_data
+                        self.box_display='block'
+                    except orjson.JSONDecodeError as e:
+                        print('!!',e)
+                        print([hover_json])
+                if hover_key=='d':
+                    self.remove_point(self.hover_dict['id'])
         else:
             self.box_display='none'
+            self.hover_json=''
+            self.hover_key=''
+            self.hover_dict={}
 
     def toggle_freeze_display(self):
         if self.box_display=='block':

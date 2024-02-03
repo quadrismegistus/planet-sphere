@@ -18,9 +18,9 @@ class UserState(LocationState):
 
     def login_from_token(self):
         try:
-            jwt.decode(self.token, SECRET_KEY, algorithms=["HS256"])
+            res = jwt.decode(self.token, SECRET_KEY, algorithms=["HS256"])
             self.logged_in = True
-            return True
+            return res
         except jwt.ExpiredSignatureError:
             self.logged_in=False
             return False
@@ -81,8 +81,9 @@ class UserState(LocationState):
         self.store_opts(username='',token='')
 
     def handle_post(self, data):
-        if self.login_from_token():
-            user = User.get(name=self.username)
+        payload = self.login_from_token()
+        if payload:
+            user = User.get(id=payload['sub'])
             post = data.get('post','')
             user.post(
                 txt=post, 

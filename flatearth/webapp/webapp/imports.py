@@ -15,6 +15,7 @@ from flatearth import *
 import reflex as rx
 
 DARK_MODE_DEFAULT = False
+LOC_TRACE_NAME='My location'
 
 
 
