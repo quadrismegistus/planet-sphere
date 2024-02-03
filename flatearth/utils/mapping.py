@@ -24,7 +24,7 @@ projections = ["airy", "aitoff", "albers", "albers usa", "august", "azimuthal eq
 PROJECTION = 'nicolosi'
 
 
-def init_map() -> go.Figure:
+def init_map(darkmode=False) -> go.Figure:
     scatter = go.Scattergeo()
     fig = go.Figure(scatter)
     fig.update_geos(
@@ -38,7 +38,7 @@ def init_map() -> go.Figure:
         showrivers=True,
         showlakes=False,
         projection_type=PROJECTION,
-        **map_colors_light
+        **(map_colors_light if not darkmode else map_colors_dark)
     )
     relayout_fig(fig)
     fig.update_layout(

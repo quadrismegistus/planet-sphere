@@ -69,10 +69,10 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-var systemColorScheme = '';
+window.systemColorScheme = '';
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-    systemColorScheme = event.matches ? "dark" : "light";
+    window.systemColorScheme = event.matches ? "dark" : "light";
 });
 
 document.addEventListener('keydown', function(event) {

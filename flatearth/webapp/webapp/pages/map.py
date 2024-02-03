@@ -79,6 +79,7 @@ def map_page() -> rx.Component:
             MapState.start_posts,
             HoverState.watch_hover,
             MapState.init,
+            MapState.watch_map_darkmode
         ],
         background_color=MapState.bgcolor
         # border='1px dotted blue'

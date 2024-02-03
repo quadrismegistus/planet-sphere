@@ -12,6 +12,7 @@ class MapState(LocationState):
     seen: set = set()
     read: set = set()
     projection: str = PROJECTION
+    map_darkmode: bool = DARK_MODE_DEFAULT
 
     def clear_traces(self):
         self.fig = go.Figure(data=[], layout=self.layout)
@@ -20,12 +21,21 @@ class MapState(LocationState):
         self.fig = self.fig.update_geos(projection_type=proj.lower())
         self.layout = init_layout(self.fig)
 
-    def toggle_dark_mode(self):
-        self.darkmode = not self.darkmode 
-        self.fig = self.fig.update_geos(**self.map_colors)
+    def toggle_dark_mode_map(self):
+        self.map_darkmode = not self.map_darkmode
+        self.fig = self.fig.update_geos(
+            **self.map_colors
+        )
         self.layout = init_layout(self.fig)
-        self.store_opt('darkmode',self.darkmode)
-
+    
+    @rx.background
+    async def watch_map_darkmode(self):
+        while True:
+            async with self:
+                if self.darkmode != self.map_darkmode:
+                    self.toggle_dark_mode_map()
+            await asyncio.sleep(.5)
+        
     def add_point(self, lat=None, lon=None, trace_name=''):
         if lat is None or lon is None: return
         fig = traces_removed(self.fig, {trace_name})
@@ -71,6 +81,9 @@ class MapState(LocationState):
 
     def set_blue_dot(self, lat=0, lon=0):
         self.add_point(trace_name=LOC_TRACE_NAME,lat=lat,lon=lon)
+        i=0
+
+    
 
     # def check_geolocation(self):
     #     return rx.call_script(

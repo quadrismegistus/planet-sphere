@@ -14,6 +14,8 @@ from flatearth import *
 
 import reflex as rx
 
+DARK_MODE_DEFAULT = False
+
 
 
 ##

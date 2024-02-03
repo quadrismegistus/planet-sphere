@@ -2,20 +2,28 @@ from ..imports import *
 from ..styles import *
 from flatearth.utils.mapping import map_colors_dark, map_colors_light
 
-DARK_MODE_DEFAULT = False
 
 class ColorState(rx.State):
+    app_darkmode: bool = DARK_MODE_DEFAULT
+    sys_darkmode: bool = DARK_MODE_DEFAULT
     darkmode: bool = DARK_MODE_DEFAULT
     opts_json: str = rx.LocalStorage('{}')
+    src_darkmode: Literal['app','system'] = 'app' # or 'system' or 'app'
 
     def init(self):
         if self.opts_json:
             opts = from_json(str(self.opts_json))
-            darkmode = opts.get('darkmode',self.darkmode)
-            if darkmode != self.darkmode: 
-                return self.toggle_dark_mode()
+            self.app_darkmode = opts.get('app_darkmode',self.app_darkmode)
+            self.src_darkmode = opts.get('app_darkmode',self.src_darkmode)
+        
             
-    
+    @rx.var
+    def darkmode(self):
+        return (
+            self.sys_darkmode 
+            if self.src_darkmode=='system' 
+            else self.app_darkmode
+        )
 
     @rx.var
     def map_colors(self) -> dict:
@@ -47,20 +55,26 @@ class ColorState(rx.State):
         self.opts_json = to_json(opts)
 
     def toggle_dark_mode(self):
-        self.darkmode = not self.darkmode
-        self.store_opt('darkmode',self.darkmode)
+        self.app_darkmode = not self.darkmode
+        self.src_darkmode = 'app'
+        self.store_opt('app_darkmode',self.app_darkmode)
+        self.store_opt('src_darkmode',self.src_darkmode)
 
 
     def check_sys_darkmode(self):
         return rx.call_script(
-            "systemColorScheme",
+            "window.systemColorScheme",
             callback=ColorState.set_sys_darkmode,
         )
     
     def set_sys_darkmode(self, darkmode_str):
         darkmode = darkmode_str == 'dark'
-        if darkmode != self.darkmode:
-            self.toggle_dark_mode()
+        if self.sys_darkmode != darkmode:
+            self.sys_darkmode=darkmode
+            self.src_darkmode='system'
+            self.store_opt('src_darkmode',self.src_darkmode)
+
+
 
     @rx.background
     async def watch_sys_darkmode(self):
