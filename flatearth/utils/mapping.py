@@ -2,6 +2,56 @@ from ..imports import *
 import plotly.graph_objects as go
 px.set_mapbox_access_token(MAPBOX_ACCESS_TOKEN)
 
+map_colors_dark = dict(
+    countrycolor='rgba(255,255,255,0.15)',
+    landcolor='#324D36',
+    coastlinecolor='rgba(0,0,0,0.5)',
+    oceancolor="#121A3D",
+    bgcolor='rgba(0,0,0,0)',
+    rivercolor='#305e88'
+)
+
+map_colors_light = dict(
+    countrycolor='rgba(255,255,255,0.15)',
+    landcolor='darkseagreen',
+    coastlinecolor='rgba(0,0,0,0.5)',
+    oceancolor="lightskyblue",
+    bgcolor='rgba(0,0,0,0)',
+    rivercolor='#4788dc'
+)
+
+projections = ["airy", "aitoff", "albers", "albers usa", "august", "azimuthal equal area", "azimuthal equidistant", "baker", "bertin1953", "boggs", "bonne", "bottomley", "bromley", "collignon", "conic conformal", "conic equal area", "conic equidistant", "craig", "craster", "cylindrical equal area", "cylindrical stereographic", "eckert1", "eckert2", "eckert3", "eckert4", "eckert5", "eckert6", "eisenlohr", "equal earth", "equirectangular", "fahey", "foucaut", "foucaut sinusoidal", "ginzburg4", "ginzburg5", "ginzburg6", "ginzburg8", "ginzburg9", "gnomonic", "gringorten", "gringorten quincuncial", "guyou", "hammer", "hill", "homolosine", "hufnagel", "hyperelliptical", "kavrayskiy7", "lagrange", "larrivee", "laskowski", "loximuthal", "mercator", "miller", "mollweide", "mt flat polar parabolic", "mt flat polar quartic", "mt flat polar sinusoidal", "natural earth", "natural earth1", "natural earth2", "nell hammer", "nicolosi", "orthographic", "patterson", "peirce quincuncial", "polyconic", "rectangular polyconic", "robinson", "satellite", "sinu mollweide", "sinusoidal", "stereographic", "times", "transverse mercator", "van der grinten", "van der grinten2", "van der grinten3", "van der grinten4", "wagner4", "wagner6", "wiechel", "winkel tripel", "winkel3"]
+PROJECTION = 'nicolosi'
+
+
+def init_map() -> go.Figure:
+    scatter = go.Scattergeo()
+    fig = go.Figure(scatter)
+    fig.update_geos(
+        visible=True,
+        showframe=False,
+        # resolution=50,
+        showcountries=False,
+        showcoastlines=True,
+        showland=True,
+        showocean=True,
+        showrivers=True,
+        showlakes=False,
+        projection_type=PROJECTION,
+        **map_colors_light
+    )
+    relayout_fig(fig)
+    fig.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+    )
+    return fig
+
+
+def init_layout(fig=None):
+    fig = init_map() if fig is None else fig
+    return fig.to_dict().get('layout', {})
+
 
 def relayout_fig(fig:go.Figure, width=1000, height=800) -> go.Figure:
     fig.update_layout(
@@ -87,4 +137,5 @@ def jiggle(lat_or_lon):
     num = random.random() / 10
     num = -num if random.random()>.5 else num
     return lat_or_lon + num
+
 

@@ -1,72 +1,25 @@
 from ..imports import *
 from flatearth.utils.mapping import *
 from .colorstate import ColorState
-
-projections = ["airy", "aitoff", "albers", "albers usa", "august", "azimuthal equal area", "azimuthal equidistant", "baker", "bertin1953", "boggs", "bonne", "bottomley", "bromley", "collignon", "conic conformal", "conic equal area", "conic equidistant", "craig", "craster", "cylindrical equal area", "cylindrical stereographic", "eckert1", "eckert2", "eckert3", "eckert4", "eckert5", "eckert6", "eisenlohr", "equal earth", "equirectangular", "fahey", "foucaut", "foucaut sinusoidal", "ginzburg4", "ginzburg5", "ginzburg6", "ginzburg8", "ginzburg9", "gnomonic", "gringorten", "gringorten quincuncial", "guyou", "hammer", "hill", "homolosine", "hufnagel", "hyperelliptical", "kavrayskiy7", "lagrange", "larrivee", "laskowski", "loximuthal", "mercator", "miller", "mollweide", "mt flat polar parabolic", "mt flat polar quartic", "mt flat polar sinusoidal", "natural earth", "natural earth1", "natural earth2", "nell hammer", "nicolosi", "orthographic", "patterson", "peirce quincuncial", "polyconic", "rectangular polyconic", "robinson", "satellite", "sinu mollweide", "sinusoidal", "stereographic", "times", "transverse mercator", "van der grinten", "van der grinten2", "van der grinten3", "van der grinten4", "wagner4", "wagner6", "wiechel", "winkel tripel", "winkel3"]
-PROJECTION = 'nicolosi'
+from .locstate import LocationState
 
 
-def init_map() -> go.Figure:
-    scatter = go.Scattergeo()
-    fig = go.Figure(scatter)
-    fig.update_geos(
-        visible=True,
-        showframe=False,
-        # resolution=50,
-        showcountries=False,
-        showcoastlines=True,
-        showland=True,
-        showocean=True,
-        showrivers=True,
-        showlakes=False,
-        projection_type=PROJECTION,
-        **styles.map_colors_light
-    )
-    relayout_fig(fig)
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-    )
-    return fig
-
-
-def init_layout(fig=None):
-    fig = init_map() if fig is None else fig
-    return fig.to_dict().get('layout', {})
-
-
-
-
-
-
-class MapState(ColorState):
+class MapState(LocationState):
     fig: go.Figure = init_map()
     layout: dict = init_layout()
-    geoloc: dict[str, float] = {}
-    geolocated: bool = False
     seen: set = set()
     read: set = set()
-    projection: str = ''
-    place_data: dict = {}
+    projection: str = PROJECTION
 
     def set_projection(self, proj):
         self.fig = self.fig.update_geos(projection_type=proj.lower())
         self.layout = init_layout(self.fig)
-
 
     def toggle_dark_mode(self):
         self.darkmode = not self.darkmode 
         self.fig = self.fig.update_geos(**self.map_colors)
         self.layout = init_layout(self.fig)
         self.store_opt('darkmode',self.darkmode)
-        # return rx.call_script(
-        #     f'document.body.style.backgroundColor="{self.bgcolor}"; ' 
-        # )
-
-        
-        
-
-    
 
     def add_point(self, lat=None, lon=None, trace_name=''):
         if lat is None or lon is None: return
@@ -150,53 +103,41 @@ class MapState(ColorState):
         self.fig = fig
 
     def start_posts(self):
-        self.add_posts()
+        self.add_posts()            
 
-    def set_place(self,lat=0,lon=0):
-        place = Place.locate(lat=lat,lon=lon)
-        self.place_data = place.data
-    
-    @rx.var
-    def placename(self):
-        return self.place_data.get('name','Unknown Location')
+    def set_blue_dot(self, lat=0, lon=0):
+        self.add_point(trace_name='My location',lat=lat,lon=lon)
+
+    # def check_geolocation(self):
+    #     return rx.call_script(
+    #         "window.geoloc",
+    #         callback=MapState.set_coords,
+    #     )
+
+    # @rx.background
+    # async def watch_geolocation(self):
+    #     naptime=3
+    #     i=0
+    #     while True:
+    #         async with self:
+    #             yield self.check_geolocation()
+    #             if self.geolocated:
+    #                 break
+    #         await asyncio.sleep(naptime)
+
+    # def geolocate(self):
+    #     # lat,lon = geo_ip(self.router.session.client_ip,hostname_required=True)
+    #     # print([lat,lon])
+    #     self.set_coords({'lat':0,'lon':0})
+    #     # self.geolocated = False  # not true geoloc
+    #     return rx.call_script(scripts.geoloc_js)
 
     def set_coords(self, geoloc):
         if geoloc and geoloc != self.geoloc:
             self.geoloc = geoloc
             self.geolocated = True
-            self.add_point(trace_name='My location',**geoloc)
             self.set_blue_dot(**geoloc)
             self.set_place(**geoloc)
-            
-
-    def set_blue_dot(self, lat=0, lon=0):
-        self.add_point(trace_name='My location',lat=lat,lon=lon)
-
-    def check_geolocation(self):
-        return rx.call_script(
-            "window.geoloc",
-            callback=MapState.set_coords,
-        )
-
-    @rx.background
-    async def watch_geolocation(self):
-        naptime=3
-        i=0
-        while True:
-            async with self:
-                yield self.check_geolocation()
-                if self.geolocated:
-                    break
-            await asyncio.sleep(naptime)
-
-    def geolocate(self):
-        # lat,lon = geo_ip(self.router.session.client_ip,hostname_required=True)
-        # print([lat,lon])
-        self.set_coords({'lat':0,'lon':0})
-        # self.geolocated = False  # not true geoloc
-        return rx.call_script(scripts.geoloc_js)
-
-
 
 
 

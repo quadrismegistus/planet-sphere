@@ -6,27 +6,6 @@ import reflex as rx
 
 bgcolor_dark='black'
 bgcolor_light='white'
-
-
-map_colors_dark = dict(
-    countrycolor='rgba(255,255,255,0.15)',
-    landcolor='#324D36',
-    coastlinecolor='rgba(0,0,0,0.5)',
-    oceancolor="#121A3D",
-    bgcolor='rgba(0,0,0,0)',
-    rivercolor='#305e88'
-)
-
-map_colors_light = dict(
-    countrycolor='rgba(255,255,255,0.15)',
-    landcolor='darkseagreen',
-    coastlinecolor='rgba(0,0,0,0.5)',
-    oceancolor="lightskyblue",
-    bgcolor='rgba(0,0,0,0)',
-    rivercolor='#4788dc'
-)
-
-
 border_radius = "0.375rem"
 box_shadow = "0px 0px 0px 1px rgba(84, 82, 95, 0.14)"
 border = "1px solid #F4F3F6"

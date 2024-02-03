@@ -1,5 +1,6 @@
 from ..imports import *
 from ..styles import *
+from flatearth.utils.mapping import map_colors_dark, map_colors_light
 
 DARK_MODE_DEFAULT = False
 
@@ -8,11 +9,9 @@ class ColorState(rx.State):
     opts_json: str = rx.LocalStorage('{}')
 
     def init(self):
-        print(f'default darkmode = {DARK_MODE_DEFAULT}')
         if self.opts_json:
             opts = from_json(str(self.opts_json))
             darkmode = opts.get('darkmode',self.darkmode)
-            print(f'booted darkmode = {self.darkmode}')
             if darkmode != self.darkmode: 
                 return self.toggle_dark_mode()
             
@@ -50,7 +49,6 @@ class ColorState(rx.State):
     def toggle_dark_mode(self):
         self.darkmode = not self.darkmode
         self.store_opt('darkmode',self.darkmode)
-        print(self.opts_json)
 
 
     def check_sys_darkmode(self):

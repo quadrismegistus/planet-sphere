@@ -4,7 +4,7 @@ from .basecomponent import *
 def icon_btnlink(
     icon_name, 
     icon_path='',
-    icon_height='1.75rem',
+    icon_height='1.25rem',
     icon_padding=0,
     button_variant='link',
     cls=rx.button,
@@ -19,6 +19,7 @@ def icon_btnlink(
                 src=f'/{icon_name}.svg' if not icon_path else icon_path,
                 height=icon_height,
                 padding=icon_padding,
+                margin=0,
                 # filter=ColorState.invert_filter,
                 **icon_kwargs
             ),

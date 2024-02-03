@@ -62,7 +62,6 @@ def login_modal() -> rx.Component:
     content_logged_in = rx.modal_body(
         rx.vstack(
             rx.text(f'You are logged in as {UserState.username}.'),
-            rx.text(f'You are currently located at {MapState.placename}.'),
             rx.button('Logout', on_click=UserState.handle_logout)
         )
     )
@@ -88,6 +87,37 @@ def login_modal() -> rx.Component:
             auto_focus=True,
             block_scroll_on_mount=False,
             on_close=LoginModalState.toggle_is_open
+        ),
+    )
+
+
+class LocationModalState(rx.State):
+    is_open: bool = False
+    def toggle_is_open(self):
+        self.is_open = not self.is_open
+
+
+def location_modal() -> rx.Component:
+    return rx.box(
+        rx.modal(
+            rx.modal_overlay(
+                rx.modal_content(
+                    rx.modal_header("location"),
+                    rx.modal_body(
+                        rx.text(f'You are currently located at {MapState.placename}.'),
+                        rx.code_block(
+                            MapState.place_json
+                        )
+                    ),
+                ),
+            ),
+            is_open=LocationModalState.is_open,
+            close_on_esc=True,
+            close_on_overlay_click=True,
+            return_focus_on_close=True,
+            auto_focus=True,
+            block_scroll_on_mount=False,
+            on_close=LocationModalState.toggle_is_open
         ),
     )
 

@@ -16,7 +16,7 @@ def header() -> rx.Component:
         rx.link('flatearth',href='/'), 
         font_family='Courier', 
         font_weight='normal',
-        font_size='1.75rem',
+        font_size='1.25rem',
         padding_right='1rem',
         letter_spacing='.1em',
         padding_y=0,
@@ -30,19 +30,31 @@ def header() -> rx.Component:
     )
     darkmode_btn = icon_link(
         'darkmode',
-        on_click=MapState.toggle_dark_mode
+        on_click=MapState.toggle_dark_mode,
+        icon_kwargs=dict(
+            margin_left='.2rem'
+        )
     )
-    # map_btn = icon_link('map-location-pin', href='/')
+    post_btn = icon_link(
+        'post'
+    )
+    location_btn = icon_link(
+        'location',
+        on_click=LocationModalState.toggle_is_open
+    )
 
     return rx.vstack(
         rx.hstack(
             sitename,
             # map_btn,
             user_btn,
+            location_btn,
+            post_btn,
             darkmode_btn,
             # rx.spacer(),
         ),
         login_modal(),
+        location_modal(),
         width="100%",
         padding_y=".5rem",
         z_index=100,
