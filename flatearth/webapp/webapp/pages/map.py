@@ -77,11 +77,11 @@ def map_page() -> rx.Component:
         align_items='top',
         on_click=HoverState.toggle_freeze_display,
         on_mount=[
-            # MapState.geolocate, 
+            MapState.geolocate, 
             MapState.watch_geolocation, 
             MapState.start_posts,
             HoverState.watch_hover,
-            MapState.init
+            MapState.init,
         ],
         background_color=MapState.bgcolor
         # border='1px dotted blue'

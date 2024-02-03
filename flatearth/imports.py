@@ -35,6 +35,9 @@ from tqdm import tqdm
 import pickle
 import orjson
 import colour
+from logmap import logmap
+import jwt
+from datetime import datetime, timedelta
 
 
 PATH_DATA = os.path.expanduser('~/.cache/flatearth')
@@ -45,6 +48,7 @@ PATH_REPO_DATA = os.path.join(PATH_REPO,'flatearth','data')
 
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
 
+SECRET_KEY=b'all the galaxy a stage'
 DB_USERNAME = 'postgres'
 DB_PASSWORD = 'notflat'
 DB_DATABASE = 'flatearth'
@@ -64,6 +68,6 @@ MAPBOX_ACCESS_TOKEN = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 GEONAMES_USERNAME = 'quadrismegistus'
 DEFAULT_LANG='en'
 WRAP_WIDTH=50
-
+MIN_USERNAME_LEN = 4
 
 from .utils import *

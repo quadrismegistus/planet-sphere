@@ -15,6 +15,8 @@ class ColorState(rx.State):
             print(f'booted darkmode = {self.darkmode}')
             if darkmode != self.darkmode: 
                 return self.toggle_dark_mode()
+            
+    
 
     @rx.var
     def map_colors(self) -> dict:
@@ -49,3 +51,22 @@ class ColorState(rx.State):
         self.darkmode = not self.darkmode
         self.store_opt('darkmode',self.darkmode)
         print(self.opts_json)
+
+
+    def check_sys_darkmode(self):
+        return rx.call_script(
+            "systemColorScheme",
+            callback=ColorState.set_sys_darkmode,
+        )
+    
+    def set_sys_darkmode(self, darkmode_str):
+        darkmode = darkmode_str == 'dark'
+        if darkmode != self.darkmode:
+            self.toggle_dark_mode()
+
+    @rx.background
+    async def watch_sys_darkmode(self):
+        while True:
+            async with self:
+                yield self.check_sys_darkmode()
+            await asyncio.sleep(.5)

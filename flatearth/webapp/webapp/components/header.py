@@ -50,6 +50,6 @@ def header() -> rx.Component:
         # border_bottom='1px solid #cdcdcd',
         filter=ColorState.invert_filter,
         backdrop_filter='blur(5px)',
-        background_color='rgb(255,255,255)'
-
+        background_color='rgb(255,255,255)',
+        # on_mount=ColorState.watch_sys_darkmode
     )

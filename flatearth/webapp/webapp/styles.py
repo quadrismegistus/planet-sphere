@@ -13,7 +13,8 @@ map_colors_dark = dict(
     landcolor='#324D36',
     coastlinecolor='rgba(0,0,0,0.5)',
     oceancolor="#121A3D",
-    bgcolor='rgba(0,0,0,0)'
+    bgcolor='rgba(0,0,0,0)',
+    rivercolor='#305e88'
 )
 
 map_colors_light = dict(
@@ -21,7 +22,8 @@ map_colors_light = dict(
     landcolor='darkseagreen',
     coastlinecolor='rgba(0,0,0,0.5)',
     oceancolor="lightskyblue",
-    bgcolor='rgba(0,0,0,0)'
+    bgcolor='rgba(0,0,0,0)',
+    rivercolor='#4788dc'
 )
 
 

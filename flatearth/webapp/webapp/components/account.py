@@ -8,6 +8,13 @@ class LoginModalState(rx.State):
     def toggle_is_open(self):
         self.is_open = not self.is_open
 
+class FormStateUsername(rx.State):
+    username: str = ''
+
+    @rx.var
+    def is_error(self) -> bool:
+        return self.username and len(self.username)<MIN_USERNAME_LEN
+
 
 def login_modal() -> rx.Component:
     """The dashboard page.
@@ -18,37 +25,54 @@ def login_modal() -> rx.Component:
 
     content_do_login = rx.modal_body(
         rx.form(
-            rx.hstack(
-                rx.form_label('User', html_for='username'),
-                rx.input(
-                    default_value=UserState.username,
-                    name='username',
-                )
+            rx.vstack(
+                rx.hstack(
+                    rx.form_label('username', html_for='username'),
+                    rx.form_control(
+                        rx.input(
+                            default_value=UserState.username,
+                            name='username',
+                            on_blur=FormStateUsername.set_username,
+                        ),
+                        rx.cond(
+                            FormStateUsername.is_error,
+                            rx.form_error_message(
+                                f'Name should be {MIN_USERNAME_LEN} or more characters'
+                            )
+                        ),
+                        is_invalid=FormStateUsername.is_error,
+                        is_required=True
+                    ),
+                ),
+                rx.hstack(
+                    rx.form_label('password', html_for='password'),
+                    rx.input(
+                        default_value='',
+                        name='password',
+                        type_='password'
+                    )
+                ),
+                rx.button("submit", type_="submit"),
             ),
-            rx.hstack(
-                rx.form_label('Password', html_for='password'),
-                rx.input(
-                    default_value='',
-                    name='password',
-                    type_='password'
-                )
-            ),
-            rx.button("Login", type_="submit"),
             on_mount=UserState.init,
             on_submit=UserState.handle_login
         )
     )
 
     content_logged_in = rx.modal_body(
-        f'You are logged in as {UserState.username}.'
+        rx.vstack(
+            rx.text(f'You are logged in as {UserState.username}.'),
+            rx.text(f'You are currently located at {MapState.placename}.'),
+            rx.button('Logout', on_click=UserState.handle_logout)
+        )
     )
 
     return rx.box(
         rx.modal(
             rx.modal_overlay(
                 rx.modal_content(
-                    rx.modal_header("User"),
-                    rx.cond(UserState.username, content_logged_in, content_do_login),
+                    rx.modal_header("login/register"),
+                    rx.cond(UserState.logged_in, content_logged_in, content_do_login),
                     rx.modal_footer(
                         # rx.button(
                         #     "Close", 

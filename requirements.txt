@@ -9,6 +9,7 @@ reverse_geocode
 geocoder
 ipython
 ipinfo
+PyJWT
 
 # frontend
 reflex
@@ -23,3 +24,4 @@ logmap
 orjson
 colour
 bcrypt
+PyJWT

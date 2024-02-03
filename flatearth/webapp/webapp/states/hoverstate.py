@@ -23,10 +23,17 @@ class HoverState(rx.State):
         self.mouseY=mouseY
         self.screen_width=screen_width
         self.screen_height=screen_height
-        self.box_display = 'block' if hover_json else 'none'
-        self.hover_json = hover_json
+        
         if hover_json:
-            self.hover_dict = from_json64(hover_json)
+            try:
+                hover_data = from_json64(hover_json)
+                self.box_display = 'block'
+                self.hover_json = hover_json
+                self.hover_dict = hover_data
+            except orjson.JSONDecodeError:
+                pass
+        else:
+            self.box_display='none'
 
     def toggle_freeze_display(self):
         self.freeze_display = not self.freeze_display

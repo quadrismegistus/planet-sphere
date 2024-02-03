@@ -13,11 +13,11 @@ def init_map() -> go.Figure:
         visible=True,
         showframe=False,
         # resolution=50,
-        showcountries=True,
+        showcountries=False,
         showcoastlines=True,
         showland=True,
         showocean=True,
-        showrivers=False,
+        showrivers=True,
         showlakes=False,
         projection_type=PROJECTION,
         **styles.map_colors_light
@@ -42,11 +42,12 @@ def init_layout(fig=None):
 class MapState(ColorState):
     fig: go.Figure = init_map()
     layout: dict = init_layout()
-    geoloc: dict[str, float] = {'lat': 0.0, 'lon': 0.0}
+    geoloc: dict[str, float] = {}
     geolocated: bool = False
     seen: set = set()
     read: set = set()
     projection: str = ''
+    place_data: dict = {}
 
     def set_projection(self, proj):
         self.fig = self.fig.update_geos(projection_type=proj.lower())
@@ -94,33 +95,38 @@ class MapState(ColorState):
         sizes = [len(post.likes) for post in posts]
         
         timestamps=[post.timestamp for post in posts]
-        mint,maxt=min(timestamps),max(timestamps)
-        recencys=[
-            translate_range(
-                post.timestamp,
-                (mint,maxt),
-                (0,1)
-            )
-            for post in posts
-        ]
+        if timestamps:
+            mint,maxt=min(timestamps),max(timestamps)
+            recencys=[
+                translate_range(
+                    post.timestamp,
+                    (mint,maxt),
+                    (0,1)
+                )
+                for post in posts
+            ]
 
-        color1,color2=colour.Color('orange'),colour.Color('blue')
-        # color1.set_luminance(0.5)
-        # color2.set_luminance(0.75)
-        colors = [
-            interpolate_color(color1,color2,recency).hex
-            for recency in recencys
-        ]
+            color1,color2=colour.Color('orange'),colour.Color('blue')
+            # color1.set_luminance(0.5)
+            # color2.set_luminance(0.75)
+            colors = [
+                interpolate_color(color1,color2,recency).hex
+                for recency in recencys
+            ]
+        else:
+            colors=[]
 
         # colors = [post.place.geo.country_color for post in posts]
-        mins,maxs = min(sizes),max(sizes)
-        sizes = [
-            translate_range(
-                v,
-                (mins,maxs),
-                (5,20)
-            ) for v in sizes
-        ]
+        if sizes:
+            mins,maxs = min(sizes),max(sizes)
+            sizes = [
+                translate_range(
+                    v,
+                    (mins,maxs),
+                    (5,20)
+                ) for v in sizes
+            ]
+        
         customdatas = [
             post.json64
             for post in posts
@@ -146,17 +152,25 @@ class MapState(ColorState):
     def start_posts(self):
         self.add_posts()
 
-    def set_place(self):
-        place = Place.locate(ip=self.ip) 
+    def set_place(self,lat=0,lon=0):
+        place = Place.locate(lat=lat,lon=lon)
         self.place_data = place.data
-        self.place_json = place.json
-        self.place_name = place.name
+    
+    @rx.var
+    def placename(self):
+        return self.place_data.get('name','Unknown Location')
 
     def set_coords(self, geoloc):
         if geoloc and geoloc != self.geoloc:
             self.geoloc = geoloc
             self.geolocated = True
             self.add_point(trace_name='My location',**geoloc)
+            self.set_blue_dot(**geoloc)
+            self.set_place(**geoloc)
+            
+
+    def set_blue_dot(self, lat=0, lon=0):
+        self.add_point(trace_name='My location',lat=lat,lon=lon)
 
     def check_geolocation(self):
         return rx.call_script(
@@ -176,9 +190,10 @@ class MapState(ColorState):
             await asyncio.sleep(naptime)
 
     def geolocate(self):
-        lat,lon = geo_ip(self.router.session.client_ip,hostname_required=True)
-        self.add_point(lat,lon)
-        self.geoloc = {'lat':lat, 'lon':lon}
+        # lat,lon = geo_ip(self.router.session.client_ip,hostname_required=True)
+        # print([lat,lon])
+        self.set_coords({'lat':0,'lon':0})
+        # self.geolocated = False  # not true geoloc
         return rx.call_script(scripts.geoloc_js)
 
 

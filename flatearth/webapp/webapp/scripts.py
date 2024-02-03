@@ -52,4 +52,11 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+var systemColorScheme = '';
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+    systemColorScheme = event.matches ? "dark" : "light";
+});
+
+
 """
