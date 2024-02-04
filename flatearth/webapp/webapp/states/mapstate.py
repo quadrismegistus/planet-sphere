@@ -168,7 +168,7 @@ class MapState(FeedState):
             marker_size=10,
             hovertext=None,
             hoverinfo=None,
-            hovertemplate="{%customdata}",
+            hovertemplate="%{customdata}",
             customdata=[' '],
             marker_color='#5383EC',  # blue
             marker_symbol='circle-dot',
