@@ -1,0 +1,7 @@
+{
+  "name": "flatearth-ionic",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
