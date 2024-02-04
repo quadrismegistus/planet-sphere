@@ -26,7 +26,7 @@ def header() -> rx.Component:
     
     user_btn = icon_link(
         'account-avatar-head',
-        on_click=ModalStates.toggle_login_is_open
+        on_click=ModalStates.open_login_modal
     )
     darkmode_btn = icon_link(
         'darkmode',
@@ -37,11 +37,11 @@ def header() -> rx.Component:
     )
     post_btn = icon_link(
         'post',
-        on_click=ModalStates.toggle_posting_is_open
+        on_click=ModalStates.open_posting_modal
     )
     location_btn = icon_link(
         'location',
-        on_click=ModalStates.toggle_location_is_open
+        on_click=ModalStates.open_location_modal
     )
 
     return rx.vstack(

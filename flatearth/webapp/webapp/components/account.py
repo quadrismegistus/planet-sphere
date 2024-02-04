@@ -74,7 +74,7 @@ def login_modal() -> rx.Component:
                     rx.modal_header("login/register"),
                     rx.cond(UserState.logged_in, loggedin_modal_body(), login_modal_body()),
                     rx.modal_footer(
-                        rx.button('Close', on_click=ModalStates.toggle_login_is_open)
+                        rx.button('Close', on_click=ModalStates.close_login_modal)
                     )
                 ),
             ),
@@ -84,7 +84,7 @@ def login_modal() -> rx.Component:
             return_focus_on_close=True,
             auto_focus=True,
             block_scroll_on_mount=False,
-            on_close=ModalStates.toggle_login_is_open
+            on_close=ModalStates.close_login_modal
         ),
     )
 
@@ -107,17 +107,17 @@ def location_modal() -> rx.Component:
                         )
                     ),
                     rx.modal_footer(
-                        rx.button('Close', on_click=ModalStates.toggle_location_is_open)
+                        rx.button('Close', on_click=ModalStates.close_location_modal)
                     )
                 ),
             ),
             is_open=ModalStates.location_is_open,
-            # close_on_esc=True,
-            # close_on_overlay_click=True,
-            # return_focus_on_close=True,
-            # auto_focus=True,
-            # block_scroll_on_mount=False,
-            on_close=ModalStates.toggle_location_is_open
+            close_on_esc=True,
+            close_on_overlay_click=True,
+            return_focus_on_close=True,
+            auto_focus=True,
+            block_scroll_on_mount=False,
+            on_close=ModalStates.close_location_modal
         ),
     )
 
@@ -152,7 +152,7 @@ def post_modal() -> rx.Component:
             return_focus_on_close=True,
             auto_focus=True,
             block_scroll_on_mount=False,
-            on_close=ModalStates.toggle_posting_is_open
+            on_close=ModalStates.close_posting_modal
         ),
     )
 
