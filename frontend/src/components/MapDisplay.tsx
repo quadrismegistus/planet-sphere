@@ -26,6 +26,9 @@ export function MapDisplay() {
   const [markers, setMarkers] = useState<MarkerDatum[]>([]);
   const { coords, loading } = useGeolocation();
   const [clickedMarkerId, setClickedMarkerId] = useState<string>();
+  // State to manage the active popup and its content
+  const [activePopup, setActivePopup] = useState<string>("");
+  const [showPopup, setShowPopup] = useState(false);
 
 
   // Assuming flyTo is a function that pans the map to new coordinates
@@ -59,7 +62,7 @@ export function MapDisplay() {
 
   // Effect to generate markers on component mount
   useEffect(() => {
-    generateRandomMarkers(10); // Generate 10 random markers
+    generateRandomMarkers(100); // Generate 10 random markers
   }, []);
 
   // // Function to add a marker
@@ -78,10 +81,27 @@ export function MapDisplay() {
     });
   };
 
-  const handleMarkerClick = (marker: MarkerDatum, event:MapLayerMouseEvent) => {
+  const handleMarkerClick1 = (marker: MarkerDatum, event:MapLayerMouseEvent) => {
     // Prevent the map click event from firing when a marker is clicked
     event.originalEvent?.stopPropagation();
     setClickedMarkerId(marker.id);
+  };
+
+  const handleMarkerClick = async (marker: MarkerDatum, event:MapLayerMouseEvent) => {
+    try {
+      // Fetch data from the server
+      const response = await fetch(`http://localhost:8000/place/${marker.lat}/${marker.lon}`);
+      const result = await response.json();
+      console.log('result',result);
+      
+      // Update the active popup content and position
+      setClickedMarkerId(marker.id);
+      setActivePopup(result.name);
+      console.log('popup',activePopup);
+      setShowPopup(true); // Show the popup
+    } catch (error) {
+      console.error('Error fetching place data', error);
+    }
   };
 
   const flyTo = (newCoords: Coordinates) => {
@@ -125,7 +145,7 @@ export function MapDisplay() {
               latitude={marker.lat}
               onClick={(event) => handleMarkerClick(marker, event)} // Add click handler to marker
             >
-            {clickedMarkerId === marker.id && (
+            {(clickedMarkerId==marker.id) && showPopup && (
 
                 <Popup
                 latitude={marker.lat}
@@ -136,7 +156,8 @@ export function MapDisplay() {
                 onClose={() => setClickedMarkerId("")} // Reset clicked marker id on close
               >
                 {/* {marker.content} */}
-                <div dangerouslySetInnerHTML={{ __html: marker.content }} />
+                {/* <div dangerouslySetInnerHTML={{ __html: activePopup }} /> */}
+                {activePopup}
                 </Popup>
             )}
 

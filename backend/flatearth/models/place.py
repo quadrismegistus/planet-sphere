@@ -75,7 +75,7 @@ class Place(Base):
             )
         
         # force safe location
-        geo = geo.safe
+        # geo = geo.safe
         
         # find nearby existing locs
         place = self.nearest(geo.lat,geo.lon,maxdist_km=maxdist_km)

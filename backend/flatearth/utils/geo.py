@@ -139,6 +139,7 @@ class Geocode:
             **kwargs
         )
         if not res:
+            logger.debug('using reverse_geocode')
             resd = reverse_geocode.get((lat,lon))
             city,country = resd.get('city'),resd.get('country')
             if city and country:
