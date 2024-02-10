@@ -11,3 +11,32 @@
 .mapboxgl-popup-close-button {
     filter: invert(1);
 }
+
+.logo { 
+    margin:auto;
+    color:#222;
+    font-family: cursive, Georgia, 'Times New Roman', Times, serif;
+    letter-spacing: .3rem;
+}
+
+/* Example of custom dark mode styling */
+body.dark {
+    --ion-background-color: #000;
+    --ion-text-color: #fff;
+    /* Add more custom variables or element styles as needed */
+
+    .logo {
+        color:#eee;
+    }
+  }
+
+
+
+.mapContainer {
+    position:absolute;
+    top:0;
+    left:0;
+    height:100dvh;
+    width:100dvw;
+    z-index:0;
+}

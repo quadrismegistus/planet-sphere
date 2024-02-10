@@ -15,6 +15,12 @@ interface MarkerDatum {
   content: string
 }
 
+interface PopupState {
+  content: string
+  lat: number
+  lon: number
+}
+
 interface Coordinates {
   lat: number;
   lon: number;
@@ -27,7 +33,7 @@ export function MapDisplay() {
   const { coords, loading } = useGeolocation();
   const [clickedMarkerId, setClickedMarkerId] = useState<string>();
   // State to manage the active popup and its content
-  const [activePopup, setActivePopup] = useState<string>("");
+  const [activePopup, setActivePopup] = useState<PopupState>({lat:0, lon:0, content:''});
   const [showPopup, setShowPopup] = useState(false);
 
 
@@ -96,7 +102,7 @@ export function MapDisplay() {
       
       // Update the active popup content and position
       setClickedMarkerId(marker.id);
-      setActivePopup(result.name);
+      setActivePopup({content: result.name, lat:result.lat, lon:result.lon});
       console.log('popup',activePopup);
       setShowPopup(true); // Show the popup
     } catch (error) {
@@ -121,6 +127,7 @@ export function MapDisplay() {
   
 
   return (
+      <div className='mapContainer'>
       <Map
           ref={mapRef}
           initialViewState={{
@@ -128,7 +135,6 @@ export function MapDisplay() {
               longitude: coords.lon,
               zoom: 2
           }}
-          style={{width: '100%', height: '100%'}}
           // mapStyle="mapbox://styles/mapbox/streets-v11"
           mapStyle="mapbox://styles/ryanheuser/clsfj542r03ey01pbexmje2us"
           mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
@@ -148,8 +154,8 @@ export function MapDisplay() {
             {(clickedMarkerId==marker.id) && showPopup && (
 
                 <Popup
-                latitude={marker.lat}
-                longitude={marker.lon}
+                latitude={activePopup.lat}
+                longitude={activePopup.lon}
                 closeButton={true}
                 closeOnClick={true}
                 anchor="top"
@@ -157,13 +163,14 @@ export function MapDisplay() {
               >
                 {/* {marker.content} */}
                 {/* <div dangerouslySetInnerHTML={{ __html: activePopup }} /> */}
-                {activePopup}
+                {activePopup.content}
                 </Popup>
             )}
 
             </Marker>
           ))}
       </Map>
+      </div>
   );
 }
 

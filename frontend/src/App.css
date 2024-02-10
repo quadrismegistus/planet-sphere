@@ -1,0 +1,14 @@
+/* Targeting the IonTabBar at the top slot specifically */
+ion-tab-bar {
+    border-bottom:1px solid black;
+    background-color: rgba(0,0,0,0);
+    /* position:absolute;
+    top:0;
+    left:0; */
+    z-index:10;
+  }
+
+ion-tab-button {
+    background-color: rgba(0,0,0,0);
+    z-index:1000;
+}
