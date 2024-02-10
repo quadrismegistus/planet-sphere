@@ -129,6 +129,7 @@ class Post(Base):
     @classmethod
     def iter_latest(cls, limit=10, replies=False, reposts=False, seen:set=None):
         i=0
+        if seen: seen=set(seen)
         for post in get_db_session().query(cls).order_by(-cls.timestamp):
             if (replies or not post.is_reply) and (reposts or not post.is_repost) and (not seen or post.id not in seen):
                 yield post
