@@ -42,4 +42,8 @@ body.dark {
 }
 
 .post_txt { font-size: .9rem; }
-.post_meta { margin-bottom:1rem}
+.post_meta { margin-bottom:1rem;  text-align: center;}
+
+.mapboxgl-popup { min-width:17rem;}
+
+.mapboxgl-popup-content { padding:.5rem; }
