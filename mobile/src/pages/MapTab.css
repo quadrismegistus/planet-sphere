@@ -1,0 +1,13 @@
+#map {
+    width:100dvw;
+    height:100dvh;
+}
+
+
+.mapboxgl-popup-content {
+    color:black;
+}
+
+.mapboxgl-popup-close-button {
+    filter: invert(1);
+}

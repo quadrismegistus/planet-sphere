@@ -1,6 +1,7 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import { GeolocationDisplay } from '../components/GeolocationDisplay';
+import { MapDisplay } from '../components/MapDisplay';
 import { GeolocationProvider } from '../components/GeolocationProvider';
 import './MapTab.css';
 
@@ -19,9 +20,11 @@ const MapTab: React.FC = () => {
             <IonTitle size="large">Mapping</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Tab 1 page" />
+        {/* <ExploreContainer name="Mapping" /> */}
         <GeolocationProvider>
-          <GeolocationDisplay />
+          {/* <GeolocationDisplay /> */}
+          <MapDisplay />
+
         </GeolocationProvider>
         {/* <IonButton onClick={ () => printCurrentPosition() }>
           Ok?
