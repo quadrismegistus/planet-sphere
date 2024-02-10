@@ -32,3 +32,21 @@ async def get_place(lat: float, lon: float):
     # like querying a database or calling an external API.
     place=Place.locate(lat=lat, lon=lon)
     return place.data if place else {}
+
+
+@app.get("/posts/latest")
+async def get_posts():
+    """
+    Endpoint to receive latitude and longitude as path parameters and return them.
+    """
+    # data=[post.data for post in Post.latest()]
+    # return [
+    #     {'id':post.id,
+    #      'lat':post.place.lat,
+    #      'lon':post.place.lon,
+    #      'content':post.txt}
+    #     for post in Post.latest()
+    # ]
+
+    df = post_map_df().rename(columns={'html':'content'})
+    return df[['id','lat','lon','content']].to_dict('records')

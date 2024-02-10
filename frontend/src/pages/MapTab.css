@@ -40,3 +40,6 @@ body.dark {
     width:100dvw;
     z-index:0;
 }
+
+.post_txt { font-size: .9rem; }
+.post_meta { margin-bottom:1rem}

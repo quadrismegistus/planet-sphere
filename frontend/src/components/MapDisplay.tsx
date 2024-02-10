@@ -1,3 +1,4 @@
+import axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useState,useEffect } from 'react';
 import Map, { Marker, NavigationControl, MapRef, MapEvent, MapLayerMouseEvent, Popup, MapMouseEvent, MarkerEvent } from 'react-map-gl';
@@ -26,6 +27,14 @@ interface Coordinates {
   lon: number;
 };
 
+interface PostObject {
+  id: string;
+  lat: number;
+  lon: number;
+  content: string
+}
+
+
 export function MapDisplay() {
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const mapRef = useRef<MapRef|null>(null);
@@ -35,47 +44,56 @@ export function MapDisplay() {
   // State to manage the active popup and its content
   const [activePopup, setActivePopup] = useState<PopupState>({lat:0, lon:0, content:''});
   const [showPopup, setShowPopup] = useState(false);
+  const [posts, setPosts] = useState<PostObject[]>([]);
+  const [currentPostIndex, setCurrentPostIndex] = useState<number>(0);
+
+
+  // Handler for arrow key press to navigate between places
+  const handleKeyPress = (event: KeyboardEvent) => {
+    if (event.key === 'ArrowLeft') {
+      // Go to the previous place
+      setCurrentPostIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : posts.length - 1));
+    } else if (event.key === 'ArrowRight') {
+      // Go to the next place
+      setCurrentPostIndex((prevIndex) => (prevIndex + 1) % posts.length);
+    }
+  };
+
+  // Add event listener on component mount and cleanup on unmount
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [posts.length]); // Rerun when places.length changes
+
+  // Effect to fly to a new place when currentPlaceIndex changes
+  useEffect(() => {
+    const post = posts[currentPostIndex];
+    if (post && mapRef.current) {
+      flyTo({lat:post.lat, lon:post.lon})
+      setActiveMarker(currentPostIndex);
+      // mapRef.current.flyTo({
+      //   center: [place.lon, place.lat],
+      //   zoom: 10,
+      //   speed: 1,
+      //   curve: 1,
+      //   essential: true,
+      //   // transitionInterpolator: new FlyToInterpolator(),
+      // });
+    }
+  }, [currentPostIndex, posts]);
 
 
   // Assuming flyTo is a function that pans the map to new coordinates
-  useEffect(() => {
-    mapRef.current?.flyTo({
-      center: [coords.lon, coords.lat],
-      zoom: 3,
-    });
-  }, [coords]); // Depend on coords to re-run when coords change
+  // useEffect(() => {
+  //   mapRef.current?.flyTo({
+  //     center: [coords.lon, coords.lat],
+  //     zoom: 3,
+  //   });
+  // }, [coords]); // Depend on coords to re-run when coords change
 
-
-  const popup = useMemo(() => {
-    return new mapboxgl.Popup().setText('Hello world!');
-  }, [])
-
-  const togglePopup = useCallback(() => {
-    markerRef.current?.togglePopup();
-  }, []);
-
-  // Function to generate random markers
-  const generateRandomMarkers = (count: number) => {
-    const newMarkers: MarkerDatum[] = Array.from({ length: count }, (_, index) => ({
-      id: `marker-${index}`,  
-      // Assuming the map is global, adjust the range as needed
-      lat: Math.random() * 180 - 90, // Latitude range -90 to 90
-      lon: Math.random() * 360 - 180, // Longitude range -180 to 180
-      content: "Hello <b>world</b>."
-    }));
-    setMarkers(newMarkers);
-  };
-
-  // Effect to generate markers on component mount
-  useEffect(() => {
-    generateRandomMarkers(100); // Generate 10 random markers
-  }, []);
-
-  // // Function to add a marker
-  // const addMarker = (longitude, latitude) => {
-  //   const newMarker = { longitude, latitude };
-  //   setMarkers([...markers, newMarker]);
-  // };x
 
   // Handler for map click event
   const handleMapClick = (event: MapLayerMouseEvent) => {
@@ -93,21 +111,34 @@ export function MapDisplay() {
     setClickedMarkerId(marker.id);
   };
 
-  const handleMarkerClick = async (marker: MarkerDatum, event:MapLayerMouseEvent) => {
-    try {
-      // Fetch data from the server
-      const response = await fetch(`http://localhost:8000/place/${marker.lat}/${marker.lon}`);
-      const result = await response.json();
-      console.log('result',result);
+  const setActiveMarker = (id:number) => {
+    const marker = posts[id];
+    setClickedMarkerId(marker.id);
+    setActivePopup({content: marker.content, lat:marker.lat, lon:marker.lon});
+    setShowPopup(true);
+  }
+
+  const handleMarkerClick = (marker: MarkerDatum, event:MapLayerMouseEvent) => {
+    event.originalEvent?.stopPropagation();
+    setClickedMarkerId(marker.id);
+    setActivePopup({content: marker.content, lat:marker.lat, lon:marker.lon});
+    setShowPopup(true);
+    console.log('done')
+    
+    // try {
+    //   // Fetch data from the server
+    //   const response = await fetch(`http://localhost:8000/place/${marker.lat}/${marker.lon}`);
+    //   const result = await response.json();
+    //   console.log('result',result);
       
-      // Update the active popup content and position
-      setClickedMarkerId(marker.id);
-      setActivePopup({content: result.name, lat:result.lat, lon:result.lon});
-      console.log('popup',activePopup);
-      setShowPopup(true); // Show the popup
-    } catch (error) {
-      console.error('Error fetching place data', error);
-    }
+    //   // Update the active popup content and position
+    //   setClickedMarkerId(marker.id);
+    //   setActivePopup({content: result.name, lat:result.lat, lon:result.lon});
+    //   console.log('popup',activePopup);
+    //   setShowPopup(true); // Show the popup
+    // } catch (error) {
+    //   console.error('Error fetching place data', error);
+    // }
   };
 
   const flyTo = (newCoords: Coordinates) => {
@@ -115,11 +146,41 @@ export function MapDisplay() {
       const map = mapRef.current.getMap(); // Get the map instance
       map.flyTo({
           center: [newCoords.lon, newCoords.lat],
-          essential: true // this animation is considered essential with respect to prefers-reduced-motion
+          // essential: true // this animation is considered essential with respect to prefers-reduced-motion
+          speed:1
       });
     }
   };
 
+  // Function to fetch places from the server
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get<PostObject[]>('http://localhost:8000/posts/latest');
+      
+      // Example of sorting the response data
+      const sortedData = response.data.sort((a, b) => {
+        // First, compare by latitude
+        if (a.lat < b.lat) return -1;
+        if (a.lat > b.lat) return 1;
+
+        // If the latitudes are equal, then sort by longitude
+        if (a.lon < b.lon) return -1;
+        if (a.lon > b.lon) return 1;
+
+        // If both latitude and longitude are equal, return 0 (no sorting)
+        return 0;
+      });
+
+      setPosts(sortedData); // Set the places in state
+    } catch (error) {
+      console.error('Error fetching places', error);
+    }
+  };
+
+  // Fetch places on component mount
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
 
   if (loading) return <div>Loading geolocation...</div>;
@@ -144,7 +205,7 @@ export function MapDisplay() {
           <NavigationControl position="top-right" />
           {/* <Marker longitude={coords.lon} latitude={coords.lat} anchor="bottom" popup={popup} ref={markerRef} scale={.5} /> */}
           
-          {markers.map((marker, index) => (
+          {posts.map((marker, index) => (
             <Marker
               key={marker.id} // Use unique id for key, not index
               longitude={marker.lon}
@@ -162,8 +223,8 @@ export function MapDisplay() {
                 onClose={() => setClickedMarkerId("")} // Reset clicked marker id on close
               >
                 {/* {marker.content} */}
-                {/* <div dangerouslySetInnerHTML={{ __html: activePopup }} /> */}
-                {activePopup.content}
+                <div dangerouslySetInnerHTML={{ __html: activePopup.content }} />
+                {/* {activePopup.content} */}
                 </Popup>
             )}
 

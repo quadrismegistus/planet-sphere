@@ -162,13 +162,15 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, ma
     posts_ld=[]
 
     def html_post(post):
-        return (
-            f'<b>{post['place']['name']}</b><br>'
-            f'{wrap_html(post['text']['txt'])}<br>'
-            f'&nbsp;<i>—{post['user']['name']}</i><br>'
-            f'{how_long_ago(post['timestamp'])} '
-        )
-
+        return f'''
+<div class="post">
+<div class="post_meta">
+{post['user']['name']}<br>
+{how_long_ago(post['timestamp'])}<br>
+from {post['place']['name']}
+</div>
+<div class="post_txt">{post["text"]["txt"]}</div>
+'''
     def add_post(post):
         posts_ld.append(dict(
             id=post['id'],
