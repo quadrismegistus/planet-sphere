@@ -1,4 +1,6 @@
 from flatearth import *
+from pydantic import BaseModel
+from typing import List
 from datetime import timedelta
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,21 +28,6 @@ app.add_middleware(
 )
 
 
-@app.get("/place/{lat}/{lon}")
-async def get_place(lat: float, lon: float):
-    """
-    Endpoint to receive latitude and longitude as path parameters and return them.
-    """
-    print(get_place,lat,lon)
-    # Here you can add logic to process latitude and longitude, 
-    # like querying a database or calling an external API.
-    place=Place.locate(lat=lat, lon=lon)
-    return place.data if place else {}
-
-
-from pydantic import BaseModel
-from typing import List
-
 class PostQuery(BaseModel):
     type: str
     seen: List[int]
@@ -53,6 +40,7 @@ async def get_posts(query:PostQuery):
     logger.debug(query)
     df = post_map_df(seen=query.seen).rename(columns={'html':'content'})
     return df[['id','lat','lon','content']].to_dict('records')
+
 
 @app.get("/posts/latest")
 async def get_posts():
@@ -91,7 +79,17 @@ async def login(query:LoginQuery):
 
 
 
+class PlaceQuery(BaseModel):
+    lat: float
+    lon: float
 
+@app.post("/places/query")
+async def get_place(query:PlaceQuery):
+    """
+    Endpoint to receive latitude and longitude as path parameters and return them.
+    """
+    place = Place.locate(lat=query.lat, lon=query.lon)
+    return place.data if place else {}
 
 
 

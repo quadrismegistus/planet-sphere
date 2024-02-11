@@ -198,9 +198,15 @@ export function MapDisplay() {
           onLoad={() => setMapLoaded(true)} // Set mapLoaded to true when the map finishes loading
           // onClick={handleMapClick} // Attach the click event handler
       >
-          <NavigationControl position="top-right" />
+          {/* <NavigationControl position="top-right" /> */}
           {/* <Marker longitude={coords.lon} latitude={coords.lat} anchor="bottom" popup={popup} ref={markerRef} scale={.5} /> */}
-          
+          <Marker key="myloc" longitude={coords.lon} latitude={coords.lat}>
+          <img
+            src="blur.png"
+            alt="My location"
+            width="20em"
+          />
+          </Marker>
           {postsQueue.map((post,index) => !readPostIds.has(post.id) && (
             <Marker
               // key={post.id.toString()+'-'+index.toString()} // Use unique id for key, not index

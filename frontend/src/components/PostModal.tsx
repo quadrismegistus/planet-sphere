@@ -19,7 +19,7 @@ import LoginModal from './LoginModal';
 const PostModal: React.FC = () => {
     const { postIsOpen, hidePostModal, showPostModal, showLoginModal } = useModal();
     const { user } = useAuth();
-    const { coords, loading } = useGeolocation();
+    const { coords, loading, locationInfo } = useGeolocation();
 
     useEffect(() => {
         if(!user && postIsOpen) {
@@ -31,12 +31,12 @@ const PostModal: React.FC = () => {
         <IonModal isOpen={postIsOpen} onDidDismiss={hidePostModal}className="side-modal">
         <IonHeader>
         <IonToolbar>
-          <IonTitle>Post</IonTitle>
+          <IonTitle>Post {user && locationInfo && (<span>from {locationInfo["city"]}</span>)}</IonTitle>
         </IonToolbar>
       </IonHeader>
-        {user && (
+        {user && locationInfo && (
           <IonContent className="ion-padding">
-            Post!
+            {locationInfo["name"]}
           </IonContent>
         )}
         </IonModal>

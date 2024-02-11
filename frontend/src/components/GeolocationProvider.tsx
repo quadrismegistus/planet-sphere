@@ -1,79 +1,83 @@
-import { Component, createContext, useContext, ReactNode } from 'react';
+import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
+import axios from 'axios';
 
-// Create a context
 // Define the shape of your context data
 interface GeolocationContextType {
-    coords: {
-      lat: number;
-      lon: number;
-    };
-    loading: boolean;
-  }
-  
-// Provide a default value matching the context type
+  coords: {
+    lat: number;
+    lon: number;
+  };
+  loading: boolean;
+  locationInfo: any; // Adjust according to the data structure you expect
+}
+
 const defaultGeolocationContext: GeolocationContextType = {
-    coords: {
-        lat: 0,
-        lon: 0,
-    },
-    loading: true, // Assuming true as default; adjust as needed
+  coords: { lat: 0, lon: 0 },
+  loading: true,
+  locationInfo: null,
 };
 
-// Create the context with the default value
 const GeolocationContext = createContext<GeolocationContextType>(defaultGeolocationContext);
 
-
-// Extend props type to include children
 interface GeolocationProviderProps {
-    children: ReactNode;
-  }
-  
-export class GeolocationProvider extends Component<GeolocationProviderProps> {
-    state: GeolocationContextType = {
-        coords: {
-            lat: 0,
-            lon: 0,
-        },
-        loading: true,
+  children: ReactNode;
+}
+
+export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ children }) => {
+  const [coords, setCoords] = useState({ lat: 0, lon: 0 });
+  const [loading, setLoading] = useState(true);
+  const [locationInfo, setLocationInfo] = useState<any>(null);
+
+  useEffect(() => {
+    // Declare an async function inside the useEffect
+    const startWatchingPosition = async () => {
+      const watchId = await Geolocation.watchPosition({}, (position, err) => {
+        if (!err && position) {
+          setCoords({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+          setLoading(false);
+
+          // Fetch additional location info asynchronously
+          fetchLocationInfo(position.coords.latitude, position.coords.longitude);
+        } else {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+      // Cleanup function
+      return () => {
+        Geolocation.clearWatch({ id: watchId });
+      };
     };
 
-    watchId?: string;
+    // Call the async function
+    startWatchingPosition();
+  }, []);
 
-    componentDidMount() {
-        Geolocation.watchPosition({}, (position, err) => {
-        if (!err && position) {
-            console.log(position);
-            this.setState({
-            coords: {
-                lat: position.coords.latitude,
-                lon: position.coords.longitude,
-            },
-            loading: false,
-            });
-        } else {
-            // Handle the error case
-            console.error(err); // For demonstration; in a real application, handle errors appropriately
-            this.setState({ loading: false });
-        }
-        });
-    }
-
-    componentWillUnmount() {
-        if (this.watchId) {
-        Geolocation.clearWatch({ id: this.watchId });
+  const fetchLocationInfo = async (lat: number, lon: number) => {
+    console.log(lat,lon,coords,'coords');
+    if (Math.abs(lat - coords.lat) > 0.01 || Math.abs(lon - coords.lon) > 0.01) {
+        try {
+        // Replace 'YOUR_API_ENDPOINT' with your actual API endpoint
+        const response = await axios.post('http://localhost:8000/places/query', { lat, lon });
+        console.log('response!!',response.data);
+        setLocationInfo(response.data);
+        } catch (error) {
+        console.error('Failed to fetch location info:', error);
         }
     }
+  };
 
-    render() {
-        const { children } = this.props;
-        return (
-        <GeolocationContext.Provider value={this.state}>
-            {children}
-        </GeolocationContext.Provider>
-        );
-    }
-}
+  return (
+    <GeolocationContext.Provider value={{ coords, loading, locationInfo }}>
+      {children}
+    </GeolocationContext.Provider>
+  );
+};
 
 // Hook to use geolocation context
 export const useGeolocation = () => useContext(GeolocationContext);
