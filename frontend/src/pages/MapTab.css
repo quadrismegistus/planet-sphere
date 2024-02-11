@@ -25,12 +25,11 @@ body.dark {
     --ion-text-color: #fff;
     /* Add more custom variables or element styles as needed */
 
-    .logo {
-        color:#eee;
-    }
   }
 
-
+.dark .logo {
+    color:#eee;
+}
 
 .mapContainer {
     position:absolute;
@@ -39,6 +38,10 @@ body.dark {
     height:100dvh;
     width:100dvw;
     z-index:0;
+    margin:0;
+    /* margin-bottom:3em; */
+    align-items: start;
+    vertical-align: top;
 }
 
 .post_txt { font-size: .9rem; }
@@ -47,3 +50,91 @@ body.dark {
 .mapboxgl-popup { min-width:17rem; background-color: rgba(255,255,255,.85); border-radius: 5px; backdrop-filter: blur(5px);}
 
 .mapboxgl-popup-content { padding:.5rem; background-color: rgba(0,0,0,0); }
+
+
+
+.nextbtn {
+    margin-left:auto;
+    margin-right:0;
+    float:right;
+}
+.prevbtn {
+    margin-left:0;
+    margin-right:auto;
+    float:left;
+}
+.mapfooter {
+    position:fixed;
+    top:0;
+    z-index:1000;
+    border:none;
+    box-shadow: none;
+    pointer-events: none;
+    /* background-color: rgba(0,0,0,1); */
+} 
+
+ion-tab-bar {
+    /* height:3em; */
+}
+
+.mapfooter ion-tab-bar {
+    position:relative;
+}
+
+
+
+
+/* Style for the toolbar containing the buttons */
+.toolbar {
+    /* --background: transparent; */
+    --border:none;
+    text-align: center;
+    height:fit-content;
+    position:fixed;
+    bottom:0;
+    pointer-events: none;
+    width:100%;
+}  
+  /* General button styling to match IonTabButton */
+  .toolbar ion-button {
+    --padding-start: 0; /* Adjust padding to match IonTabButton */
+    --padding-end: 0; /* Adjust padding to match IonTabButton */
+    --padding-top: 0; /* Adjust padding to match IonTabButton */
+    --padding-bottom: 0; /* Adjust padding to match IonTabButton */
+    --background: transparent; /* Match the background color if needed */
+    --background-activated: none; /* Remove highlight color on click */
+    --background-focused: none; /* Remove focus color */
+    --background-hover: none; /* Remove hover color */
+    --ripple-color: transparent; /* Remove ripple effect if needed */
+    --color: #eee;
+    pointer-events: auto;
+  }
+
+
+  
+  
+  /* Style for the icon within the buttons to match IonTabButton */
+  .toolbar ion-icon {
+    --color: #ffffff; /* Adjust to match IonTabButton icon color */
+    --font-size: 1.5em; /* Adjust to match IonTabButton icon size */
+    padding-left: .5rem;
+    padding-right: .5rem;
+  }
+  
+  /* Style for the label within the buttons to match IonTabButton */
+  .toolbar ion-label {
+    --color: #ffffff; /* Adjust to match IonTabButton text color */
+    --font-size: 0.8em; /* Adjust to match IonTabButton text size */
+    text-transform: uppercase; /* If your IonTabButton text is uppercase */
+    display:block;
+  }
+  
+  /* You may also need to handle the states such as hover, active, focused for custom styles */
+  .toolbar ion-button:hover,
+  .toolbar ion-button:active,
+  .toolbar ion-button:focus {
+    --opacity: 0.7; /* Adjust to match IonTabButton styles */
+  }
+
+
+/* ion-content, ion-page {--background:transparent} */

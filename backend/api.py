@@ -107,8 +107,12 @@ async def get_place(query:PlaceQuery):
     return place.data if place else {}
 
 
+# class IPQuery(BaseModel):
+#     ip: str
 
-
+# @app.post('/places/geoip')
+# async def get_geoip(query:IPQuery):
+#     return geo_ipinfo(query.ip)
 
 
 

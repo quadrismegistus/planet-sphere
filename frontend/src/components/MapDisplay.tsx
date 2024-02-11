@@ -1,3 +1,5 @@
+import { arrowBackOutline, arrowForwardOutline, checkmarkOutline } from 'ionicons/icons';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonModal, IonIcon, IonFooter, IonLabel, IonTabButton,IonTabBar } from '@ionic/react';
 import axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useState,useEffect } from 'react';
@@ -6,6 +8,7 @@ import { useGeolocation } from "./GeolocationProvider";
 import {useRef, useMemo, useCallback} from 'react';
 import { useModal } from './ModalProvider'
 import mapboxgl from 'mapbox-gl';
+import { IonButton } from '@ionic/react';
 
 const MAPBOX_ACCESS_TOKEN_b64 = 'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3';
 const MAPBOX_ACCESS_TOKEN = atob(MAPBOX_ACCESS_TOKEN_b64);
@@ -95,9 +98,25 @@ export function MapDisplay() {
     }
   };
 
-  useEffect(() => {
-    flyTo(coords, 17, .2);
-  }, [postIsOpen]);
+  // Handler for moving posts backwards (marking the last as unread and moving it to the front)
+  const regressPost = () => {
+    console.log('regressing', postsQueue);
+    if (postsQueue.length) {
+      const newActivePost = postsQueue.pop(); // Remove the last element
+      if (newActivePost) {
+        activatePost(newActivePost);
+        // Add the post back to the start of the queue
+        setPostsQueue(postsQueue => [newActivePost, ...postsQueue]);
+      }
+    } else {
+      setActivePost(null);
+      setPopupInfo(null);
+    }
+  };
+
+  // useEffect(() => {
+  //   flyTo(coords, 17, .2);
+  // }, [postIsOpen]);
 
   const markPostRead = (post: PostObject) => {
     console.log('marking post read',post);
@@ -119,8 +138,12 @@ export function MapDisplay() {
       // Proceed with updating the state
       return updatedReadPostIds;
     });
-
   };
+
+  const markActivePostRead = () => {
+    console.log("hello");
+    if(activePost) markPostRead(activePost);
+  }
 
   const clickPost = (post: PostObject, event:MapLayerMouseEvent) => {
     console.log('clickPost',post,event);
@@ -179,12 +202,14 @@ export function MapDisplay() {
     }
   }, [postsQueue]);
 
-  if (loading) return <div>Loading geolocation...</div>;
+  // if (loading) return <div>Loading geolocation...</div>;
 
   
 
   return (
       <div className='mapContainer'>
+
+      
       <Map
           ref={mapRef}
           initialViewState={{
@@ -231,6 +256,26 @@ export function MapDisplay() {
         </Popup>
             )}
       </Map>
+
+      <div className='toolbar'>
+      {/* <IonToolbar className="toolbar"> */}
+            <IonButton className='prevbtn' fill="clear" onClick={regressPost}>
+              <IonIcon aria-hidden="true" icon={arrowBackOutline} />
+              <IonLabel>Prev</IonLabel>
+            </IonButton>
+            <IonButton className='readbtn' fill="clear" onClick={markActivePostRead}>
+              <IonIcon aria-hidden="true" icon={checkmarkOutline} />
+              <IonLabel>Read</IonLabel>
+            </IonButton>
+            <IonButton className='nextbtn' fill="clear" onClick={advancePost}>
+              <IonLabel>Next</IonLabel>
+
+              <IonIcon aria-hidden="true" icon={arrowForwardOutline} />
+            </IonButton>
+            </div>
+          {/* </IonToolbar> */}
+      
+
       </div>
   );
 }
