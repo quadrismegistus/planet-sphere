@@ -4,6 +4,7 @@ import React, { useState,useEffect } from 'react';
 import Map, { Marker, NavigationControl, MapRef, MapEvent, MapLayerMouseEvent, Popup, MapMouseEvent, MarkerEvent } from 'react-map-gl';
 import { useGeolocation } from "./GeolocationProvider";
 import {useRef, useMemo, useCallback} from 'react';
+import { useModal } from './ModalProvider'
 import mapboxgl from 'mapbox-gl';
 
 const MAPBOX_ACCESS_TOKEN_b64 = 'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3';
@@ -44,6 +45,7 @@ export function MapDisplay() {
   const [popupInfo, setPopupInfo] = useState<PopupState|null>(null);
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const { postIsOpen } = useModal();
 
 
   // Function to fetch posts
@@ -92,6 +94,10 @@ export function MapDisplay() {
     }
   };
 
+  useEffect(() => {
+    flyTo(coords, 17, .2);
+  }, [postIsOpen]);
+
   const markPostRead = (post: PostObject) => {
     console.log('marking post read',post);
     
@@ -130,15 +136,17 @@ export function MapDisplay() {
     flyTo({lat:post.lat, lon:post.lon})
   };
 
-  const flyTo = (newCoords: Coordinates) => {
+
+
+  const flyTo = (newCoords: Coordinates, zoom:number=0, speed:number=.5) => {
     if(mapRef.current){
       const map = mapRef.current.getMap(); // Get the map instance
       // map.setCenter([newCoords.lon, newCoords.lat]);
       map.flyTo({
           center: [newCoords.lon, newCoords.lat],
           // essential: true // this animation is considered essential with respect to prefers-reduced-motion
-          speed:.5,
-          zoom: map.getZoom()
+          speed: speed,
+          zoom: zoom ? zoom : map.getZoom()
       });
     }
   };
@@ -218,3 +226,5 @@ export function MapDisplay() {
       </div>
   );
 }
+
+export { MAPBOX_ACCESS_TOKEN };

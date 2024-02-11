@@ -82,9 +82,9 @@ async def login(query:LoginQuery):
         access_token = create_access_token(
             data={"sub": query.username}, expires_delta=access_token_expires
         )
-        return {"access_token": access_token, "token_type": "bearer"}
-    except UserError:
-        return {"status":400}
+        return {"access_token": access_token, "token_type": "bearer", "msg":"OK"}
+    except UserError as e:
+        return {"status":400, 'msg':str(e)}
     
 
     

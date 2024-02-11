@@ -12,3 +12,11 @@ ion-tab-button {
     background-color: rgba(0,0,0,0);
     z-index:1000;
 }
+
+.error {
+  color:red;
+  font-size:.8rem;
+  padding:.5rem;
+}
+
+

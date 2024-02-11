@@ -1,0 +1,22 @@
+.minimap {
+    width:400px;
+    height:400px;
+}
+
+.modal-wrapper {
+    background-color: red !important;
+  }
+
+.side-modal {
+    padding-left:49dvw;
+    padding-top:74dvh;
+    /* margin-left:45dvw; */
+    /* margin-top:45dvh; */
+    --width:50dvw;
+    --height:25dvh;
+    --min-height: 350px;
+    --min-width: 500px;
+    --max-width:100vw;
+    --max-height:50vh;
+    /* padding-bottom:56dvh; */
+  }
