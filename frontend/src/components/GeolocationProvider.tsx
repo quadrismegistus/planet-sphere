@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
 import axios from 'axios';
+const REACT_APP_API_URL="http://134.209.216.92:8000"
 
 // Define the shape of your context data
 interface GeolocationContextType {
@@ -63,7 +64,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
     if (Math.abs(lat - coords.lat) > 0.01 || Math.abs(lon - coords.lon) > 0.01) {
         try {
         // Replace 'YOUR_API_ENDPOINT' with your actual API endpoint
-        const response = await axios.post(process.env.API_URL+'/places/query', { lat, lon });
+        const response = await axios.post(REACT_APP_API_URL+'/places/query', { lat, lon });
         console.log('response!!',response.data);
         setLocationInfo(response.data);
         } catch (error) {

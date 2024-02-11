@@ -3,11 +3,13 @@ import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { accessToken } from 'mapbox-gl';
 
+const REACT_APP_API_URL="http://134.209.216.92:8000"
+
 
 // Function to authenticate user by sending credentials to the backend
 export const authenticate = async (username:string, password:string) => {
     try {
-        const response = await axios.post(process.env.API_URL+'/login', {
+        const response = await axios.post(REACT_APP_API_URL+'/login', {
         username,
         password,
         });

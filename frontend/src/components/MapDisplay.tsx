@@ -50,6 +50,7 @@ export function MapDisplay() {
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const { postIsOpen } = useModal();
+  const REACT_APP_API_URL="http://134.209.216.92:8000"
 
 
   // Function to fetch posts
@@ -60,7 +61,7 @@ export function MapDisplay() {
         seen: Array.from(readPostIds)
       };
       console.log(queryData);
-      const response = await axios.post<PostObject[]>(process.env.API_URL+'/posts/query', queryData);
+      const response = await axios.post<PostObject[]>(REACT_APP_API_URL+'/posts/query', queryData);
       console.log(response);
       const uniqueNewPosts = response.data.filter(post => !postsQueue.some(existingPost => existingPost.id === post.id));
       console.log('new',uniqueNewPosts);
