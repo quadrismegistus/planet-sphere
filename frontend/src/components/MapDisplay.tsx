@@ -147,10 +147,9 @@ export function MapDisplay() {
   // Add event listener for keydown to advance posts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log(activePost,event);
       if ((event.key === 'ArrowDown') && activePost) {
         markPostRead(activePost);
-        // event.stopPropagation();
+        event.stopPropagation();
       } else if ((event.key === 'ArrowRight')) {
         advancePost();
         event.stopPropagation();

@@ -3,6 +3,7 @@ import { Redirect, Route } from 'react-router-dom';
 import {
   IonApp,
   IonHeader,
+  IonPage,
   IonIcon,
   IonImg,
   IonLabel,
@@ -13,9 +14,12 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { settingsOutline, personOutline, mapOutline, moonOutline } from 'ionicons/icons';
+import { settingsOutline, personOutline, mapOutline, journalOutline, newspaperOutline } from 'ionicons/icons';
 import React, {useEffect} from 'react';
 import MapTab from './pages/MapTab';
+import UserTab from './pages/UserTab';
+import PostTab from './pages/PostTab';
+import SettingsTab from './pages/SettingsTab';
 // import HomeContainer from './components/geoloc/container';
 // import Tab3 from './pages/Tab3';
 import './App.css';
@@ -73,35 +77,35 @@ const App: React.FC = () => {
       <IonReactRouter>
         <IonTabs>
           <IonRouterOutlet>
-            <Route exact path="/map">
-              <MapTab />
-            </Route>
-            {/* <Route exact path="/tab2">
-              <HomeContainer />
-            </Route> */}
-            {/* <Route path="/tab3">
-              <Tab3 />
-            </Route> */}
-            <Route exact path="/">
-              <Redirect to="/map" />
-            </Route>
+            <Route path="/map" component={MapTab} exact />
+            <Route path="/acct" component={UserTab} exact />
+            <Route path="/post" component={PostTab} exact />
+            <Route path="/settings" component={SettingsTab} exact />
+            <Route exact path="/" render={() => <Redirect to="/map" />} />
           </IonRouterOutlet>
+
           <IonTabBar slot="top">
-            <IonTabButton tab="tab1" href="/map">
+            
+            <IonTabButton tab="logo" href="/">
               <h1 className='logo'>flatearth</h1>
             </IonTabButton>
-            <IonTabButton tab="tab1" href="/map">
+            
+            <IonTabButton tab="map" href="/map">
               <IonIcon aria-hidden="true" icon={mapOutline} />
-              {/* <IonLabel>Tab 1</IonLabel> */}
             </IonTabButton>
-            <IonTabButton tab="tab2" href="/me">
+            
+            <IonTabButton tab="acct" href="/acct">
               <IonIcon aria-hidden="true" icon={personOutline} />
-              {/* <IonLabel>Tab 2</IonLabel> */}
             </IonTabButton>
-            <IonTabButton tab="tab3" href="/settings">
+            
+            <IonTabButton tab="post" href="/post">
+              <IonIcon aria-hidden="true" icon={newspaperOutline} />
+            </IonTabButton>
+
+            <IonTabButton tab="settings" href="/settings">
               <IonIcon aria-hidden="true" icon={settingsOutline} />
-              {/* <IonLabel>Tab 3</IonLabel> */}
             </IonTabButton>
+            
           </IonTabBar>
         </IonTabs>
       </IonReactRouter>

@@ -1,9 +1,13 @@
 from flatearth import *
-
+from datetime import timedelta
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Secret key for JWT encoding and decoding
+SECRET_KEY = "alltheworldaflatcircle"
+ALGORITHM = "HS256"
 
 # Define a list of allowed origins for CORS
 # You can use "*" to allow all origins or specify only the ones you need
@@ -57,3 +61,54 @@ async def get_posts():
     """
     df = post_map_df().rename(columns={'html':'content'})
     return df[['id','lat','lon','content']].sort_values(['lon','lat']).to_dict('records')
+
+
+
+
+
+class LoginQuery(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+async def login(query:LoginQuery):
+    try:
+        try:
+            user = User.login(name=query.username, password=query.password)
+        except UserNotExist:
+            user = User.register(name=query.username, password=query.password)
+        
+        access_token_expires = timedelta(minutes=30)
+        access_token = create_access_token(
+            data={"sub": query.username}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+    except UserError:
+        return {"status":400}
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Generate JWT token
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)  # Default to 15 minutes
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt

@@ -1,6 +1,7 @@
 from .base import *
 
-class UserNotExist(Exception): pass
+class UserError(Exception): pass
+class UserNotExist(UserError): pass
 
 
 class User(Base):
@@ -25,15 +26,15 @@ class User(Base):
     @classmethod
     def register(self, name:str, password:str):
         if not name or len(name)<MIN_USERNAME_LEN:
-            raise Exception('no or too short username given')
+            raise UserError('no or too short username given')
         
         # no password
         if not password:
-            raise Exception('no password given')
+            raise UserError('no password given')
 
         # name exists?
         if self.has(name=name):
-            raise Exception('user already exists')
+            raise UserError('user already exists')
 
         # create
         return self.create(
@@ -42,19 +43,21 @@ class User(Base):
         )
     
     @classmethod
-    def login(self, name:name, password:str):
+    def login(self, name:str, password:str):
         # valid input?
         if not name or not password:
-            raise Exception('name and pw not given')
+            raise UserError('name and pw not given')
         
         # name exists?
         user = self.get(name=name)
         if not user:
+            logger.error('user not exist')
             raise UserNotExist('user does not exist')
         
         # password ok?
         if not check_password(password, user.passhash):
-            raise Exception('password not matching')
+            logger.error('pw no match')
+            raise UserError('password not matching')
 
         return user
 
