@@ -8,7 +8,7 @@ const LoginModal: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const { login, user } = useAuth();
+  const { login, user, logout } = useAuth();
   const { loginIsOpen, hideLoginModal, showLoginModal } = useModal();{}
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -52,11 +52,16 @@ const LoginModal: React.FC = () => {
           </IonItem>
           {errorMessage && <div className="error">{errorMessage}</div>}
           <IonButton expand="block" type="submit" className="ion-margin-top">
-            Login / Register
+            Login / Register  
           </IonButton>
         </form>
         ) : (
-            <div>Congrats</div>
+            <div>
+              <div>Congrats</div>
+            <IonButton expand="block" type="submit" className="ion-margin-top" onClick={logout}>
+            log out
+          </IonButton>
+          </div>
         )}
       </IonContent>
     </IonModal>

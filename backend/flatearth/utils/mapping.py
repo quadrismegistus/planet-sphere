@@ -155,7 +155,7 @@ def jiggle(lat_or_lon):
     return lat_or_lon + num
 
 
-def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=5, max_size=20, jiggle_positions=False, **kwargs):
+def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=0, max_size=1, jiggle_positions=False, **kwargs):
     from flatearth.models import Post
     if not posts: posts = Post.latest(**kwargs)
 

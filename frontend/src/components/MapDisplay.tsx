@@ -32,6 +32,7 @@ interface PostObject {
   id: number;
   lat: number;
   lon: number;
+  size: number;
   content: string
 }
 
@@ -51,13 +52,13 @@ export function MapDisplay() {
   // Function to fetch posts
   const fetchPosts = async () => {
     try {
-      // const response = await axios.get<PostObject[]>('http://localhost:8000/posts/latest');
+      // const response = await axios.get<PostObject[]>('http://192.168.1.151:8000/posts/latest');
       const queryData = {
         type: "latest",
         seen: Array.from(readPostIds)
       };
-      
-      const response = await axios.post<PostObject[]>('http://localhost:8000/posts/query', queryData);
+      console.log(queryData);
+      const response = await axios.post<PostObject[]>('http://192.168.1.151:8000/posts/query', queryData);
       console.log(response);
       const uniqueNewPosts = response.data.filter(post => !postsQueue.some(existingPost => existingPost.id === post.id));
       console.log('new',uniqueNewPosts);
@@ -213,6 +214,7 @@ export function MapDisplay() {
               key={post.id.toString()+'-'+index.toString()} // Use unique id for key, not index
               longitude={post.lon}
               latitude={post.lat}
+              scale={post.size}
               onClick={(event) => clickPost(post,event)} // Add click handler to marker
             />
           ))}

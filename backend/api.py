@@ -5,7 +5,21 @@ from datetime import timedelta
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+# Allow all origins - for testing only!
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Secret key for JWT encoding and decoding
 SECRET_KEY = "alltheworldaflatcircle"
@@ -14,8 +28,9 @@ ALGORITHM = "HS256"
 # Define a list of allowed origins for CORS
 # You can use "*" to allow all origins or specify only the ones you need
 origins = [
-    "http://localhost:8100",  # Assuming your React app runs on this port
-    "http://localhost:3000",  # Commonly used port for React development
+    "*"
+    # "http://localhost:8100",  # Assuming your React app runs on this port
+    # "http://localhost:3000",  # Commonly used port for React development
     # Add any other origins you want to allow
 ]
 
@@ -39,7 +54,7 @@ async def get_posts(query:PostQuery):
     """
     logger.debug(query)
     df = post_map_df(seen=query.seen).rename(columns={'html':'content'})
-    return df[['id','lat','lon','content']].to_dict('records')
+    return df[['id','lat','lon','content','size']].to_dict('records')
 
 
 @app.get("/posts/latest")
@@ -48,7 +63,7 @@ async def get_posts():
     Endpoint to receive latitude and longitude as path parameters and return them.
     """
     df = post_map_df().rename(columns={'html':'content'})
-    return df[['id','lat','lon','content']].sort_values(['lon','lat']).to_dict('records')
+    return df[['id','lat','lon','content','size']].sort_values(['lon','lat']).to_dict('records')
 
 
 
