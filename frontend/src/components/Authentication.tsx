@@ -7,7 +7,7 @@ import { accessToken } from 'mapbox-gl';
 // Function to authenticate user by sending credentials to the backend
 export const authenticate = async (username:string, password:string) => {
     try {
-        const response = await axios.post('http://192.168.1.151:8000/login', {
+        const response = await axios.post(process.env.API_URL+'/login', {
         username,
         password,
         });

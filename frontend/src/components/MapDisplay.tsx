@@ -55,13 +55,12 @@ export function MapDisplay() {
   // Function to fetch posts
   const fetchPosts = async () => {
     try {
-      // const response = await axios.get<PostObject[]>('http://192.168.1.151:8000/posts/latest');
       const queryData = {
         type: "latest",
         seen: Array.from(readPostIds)
       };
       console.log(queryData);
-      const response = await axios.post<PostObject[]>('http://192.168.1.151:8000/posts/query', queryData);
+      const response = await axios.post<PostObject[]>(process.env.API_URL+'/posts/query', queryData);
       console.log(response);
       const uniqueNewPosts = response.data.filter(post => !postsQueue.some(existingPost => existingPost.id === post.id));
       console.log('new',uniqueNewPosts);
