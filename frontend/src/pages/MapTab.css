@@ -6,6 +6,7 @@
 
 .mapboxgl-popup-content {
     color:black;
+    pointer-events: none;
 }
 
 .mapboxgl-popup-close-button {
@@ -41,6 +42,7 @@ body.dark {
     margin:0;
     /* margin-bottom:3em; */
     align-items: start;
+    background-color: #02090D;
     vertical-align: top;
 }
 
@@ -51,7 +53,7 @@ body.dark {
 
 .mapboxgl-popup-content { padding:.5rem; background-color: rgba(0,0,0,0); }
 
-
+/* 
 
 .nextbtn {
     margin-left:auto;
@@ -62,7 +64,7 @@ body.dark {
     margin-left:0;
     margin-right:auto;
     float:left;
-}
+} */
 .mapfooter {
     position:fixed;
     top:0;
@@ -86,14 +88,18 @@ ion-tab-bar {
 
 /* Style for the toolbar containing the buttons */
 .toolbar {
-    /* --background: transparent; */
     --border:none;
+    padding:.1em;
     text-align: center;
     height:fit-content;
     position:fixed;
     bottom:0;
-    pointer-events: none;
+    height:50px;
+    /* pointer-events: none; */
     width:100%;
+    display:flex;
+    justify-content: space-between; /* This will space out the buttons */
+    align-items: center; /* This will vertically center the buttons if the toolbar has a height */
 }  
   /* General button styling to match IonTabButton */
   .toolbar ion-button {
@@ -106,9 +112,24 @@ ion-tab-bar {
     --background-focused: none; /* Remove focus color */
     --background-hover: none; /* Remove hover color */
     --ripple-color: transparent; /* Remove ripple effect if needed */
-    --color: #eee;
-    pointer-events: auto;
+    /* --color: #ddd; */
+    /* pointer-events: auto; */
+    /* padding-left:auto; */
+    align-items: left;
   }
+
+  .toolbar ion-button { color: #111;}
+  .dark .toolbar ion-button { color: #eee;}
+
+
+  ion-tab-bar { background-color: #eee;}
+  .dark ion-tab-bar { background-color: #1f1f1f;}
+
+  .toolbar { background-color: #eee;}
+  .dark .toolbar { background-color: #1f1f1f;}
+
+  .dark ion-tab-button { color: #eee; }
+  ion-tab-button { color: #111; }
 
 
   
@@ -119,6 +140,7 @@ ion-tab-bar {
     --font-size: 1.5em; /* Adjust to match IonTabButton icon size */
     padding-left: .5rem;
     padding-right: .5rem;
+    font-size:2em;
   }
   
   /* Style for the label within the buttons to match IonTabButton */

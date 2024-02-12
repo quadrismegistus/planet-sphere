@@ -54,7 +54,7 @@ async def get_posts(query:PostQuery):
     """
     logger.debug(query)
     df = post_map_df(seen=query.seen).rename(columns={'html':'content'})
-    return df[['id','lat','lon','content','size']].to_dict('records')
+    return df[['id','lat','lon','content','size']].sample(frac=1).to_dict('records')
 
 
 @app.get("/posts/latest")
@@ -63,7 +63,7 @@ async def get_posts():
     Endpoint to receive latitude and longitude as path parameters and return them.
     """
     df = post_map_df().rename(columns={'html':'content'})
-    return df[['id','lat','lon','content','size']].sort_values(['lon','lat']).to_dict('records')
+    return df[['id','lat','lon','content','size']].sample(frac=1).to_dict('records')
 
 
 

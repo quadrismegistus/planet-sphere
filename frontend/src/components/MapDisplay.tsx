@@ -1,17 +1,49 @@
-import { arrowBackOutline, arrowForwardOutline, checkmarkOutline } from 'ionicons/icons';
+import { getDistance } from 'geolib';
+import { arrowBackOutline, arrowForwardOutline, checkmarkOutline, glassesOutline, locateOutline, locationOutline, heartOutline, repeatOutline, searchOutline, locate, globeOutline } from 'ionicons/icons';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonModal, IonIcon, IonFooter, IonLabel, IonTabButton,IonTabBar } from '@ionic/react';
 import axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useState,useEffect } from 'react';
-import Map, { Marker, NavigationControl, MapRef, MapEvent, MapLayerMouseEvent, Popup, MapMouseEvent, MarkerEvent } from 'react-map-gl';
+import Map, { Marker, NavigationControl, MapRef, MapEvent, MapLayerMouseEvent, Popup, MapMouseEvent, MarkerEvent, Projection } from 'react-map-gl';
 import { useGeolocation } from "./GeolocationProvider";
 import {useRef, useMemo, useCallback} from 'react';
 import { useModal } from './ModalProvider'
 import mapboxgl from 'mapbox-gl';
 import { IonButton } from '@ionic/react';
+import { REACT_APP_API_URL } from '../vars'
 
 const MAPBOX_ACCESS_TOKEN_b64 = 'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3';
 const MAPBOX_ACCESS_TOKEN = atob(MAPBOX_ACCESS_TOKEN_b64);
+
+const PROJECTION = 'lambertConformalConic';
+const ZOOMOUT_ZOOM = 2;
+const ZOOMIN_ZOOM = 16;
+
+
+
+const createTimeoutManager = () => {
+  let timerId: number | null = null;
+
+  return {
+    setTimeout: (callback: () => void, delay: number) => {
+      if (timerId !== null) {
+        clearTimeout(timerId);
+      }
+      timerId = window.setTimeout(callback, delay);
+    },
+    clearTimeout: () => {
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+    }
+  };
+};
+
+// Usage
+const timeoutManager = createTimeoutManager();
+
+
 
 interface MarkerDatum {
   id: number
@@ -50,7 +82,7 @@ export function MapDisplay() {
   const [postsLoaded, setPostsLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const { postIsOpen } = useModal();
-  const REACT_APP_API_URL="http://134.209.216.92:8000"
+  const [isZoomingIn, setIsZoomingIn] = useState<boolean|null>(null)
 
 
   // Function to fetch posts
@@ -89,7 +121,7 @@ export function MapDisplay() {
     if (postsQueue.length) {
       const newActivePost = postsQueue.shift();
       if (newActivePost) { 
-        activatePost(newActivePost); 
+        activatePost(newActivePost, true); 
         setPostsQueue(postsQueue => [...postsQueue, newActivePost]);
       }
     } else {
@@ -145,6 +177,40 @@ export function MapDisplay() {
     if(activePost) markPostRead(activePost);
   }
 
+  const zoomActivePost = () => {
+    if(activePost && mapRef && mapRef.current) {
+      setIsZoomingIn(false);
+      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()+1, 1);
+    }
+  }
+  const unzoomActivePost = () => {
+    if(activePost && mapRef && mapRef.current) {
+      setIsZoomingIn(false);
+      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()-1, 1);
+    }
+  }
+
+  const unzoomActivePosition = () => {
+    if(mapRef && mapRef.current) {
+      setIsZoomingIn(true);
+      flyTo(null, mapRef.current.getZoom()-1, 1);
+    }
+  }
+
+  const zoomActivePosition = () => {
+    if(mapRef && mapRef.current) {
+      setIsZoomingIn(true);
+      flyTo(null, mapRef.current.getZoom()+1, 1);
+    }
+  }
+
+  const freezeMap = () => {
+    if(mapRef.current){
+      const map = mapRef.current.getMap(); // Get the map instance
+      map.stop();
+    }
+  }; 
+
   const clickPost = (post: PostObject, event:MapLayerMouseEvent) => {
     console.log('clickPost',post,event);
     event.originalEvent.stopPropagation();
@@ -153,37 +219,141 @@ export function MapDisplay() {
     // markPostAsSeen(post); // or similar logic as needed
   };
 
-  const activatePost = (post:PostObject) => {
+  const activatePost = (post:PostObject, zoomout=false) => {
     setActivePost(post);
     setPopupInfo({ lat:post.lat, lon:post.lon, content:post.content });
     // markPostAsSeen(post);
-    flyTo({lat:post.lat, lon:post.lon})
+    if (zoomout) flyToZoomOut({lat:post.lat, lon:post.lon})
+    else flyTo({lat:post.lat, lon:post.lon})
   };
 
-
-
-  const flyTo = (newCoords: Coordinates, zoom:number=0, speed:number=.5) => {
+  const flyTo = (newCoords: Coordinates|null=null, zoom:number|null=null, speed:number=0) => {
     if(mapRef.current){
       const map = mapRef.current.getMap(); // Get the map instance
-      // map.setCenter([newCoords.lon, newCoords.lat]);
+      const latlng=map.getCenter()
+      if(newCoords==null) newCoords={lat:latlng.lat, lon:latlng.lng}
+      
+      const calculateFlyToSpeed = (startCoords: Coordinates, endCoords: Coordinates): number => {
+        // Calculate distance in meters
+        const distance = getDistance(startCoords, endCoords);
+        const maxDistanceOnEarth = 40030000; // Adjust this to control how distance affects speed
+        const maxDistance = maxDistanceOnEarth / 10; // Adjust this to control how distance affects speed
+        const distanceNow = distance>maxDistance ? maxDistance : distance
+      
+        // Define speed modulation parameters
+        const maxSpeed = 2; // Maximum speed for close destinations
+        const minSpeed = 0.01; // Minimum speed for distant destinations
+  
+        const maxZoom = 6;
+        const zoomnow = map.getZoom() < maxZoom-1 ? map.getZoom()+1 : maxZoom
+        
+      
+        // Calculate speed based on distance
+        let speed = minSpeed + ((distanceNow / maxDistance) * (zoomnow/maxZoom) * (maxSpeed - minSpeed));
+        
+        // Ensure speed stays within defined bounds
+        if (speed < minSpeed) speed = minSpeed;
+        if (speed > maxSpeed) speed = maxSpeed;
+      
+        return speed;
+      };
+    
+    
+    
+    
+      const currentCoords = map.getCenter(); // Get current map center
+      speed = speed ? speed : calculateFlyToSpeed({lat: currentCoords.lng, lon:currentCoords.lng}, newCoords);
       map.flyTo({
           center: [newCoords.lon, newCoords.lat],
-          // essential: true // this animation is considered essential with respect to prefers-reduced-motion
           speed: speed,
-          zoom: zoom ? zoom : map.getZoom()
+          zoom: ((zoom!=null) ? zoom : map.getZoom())
+          // curve: 1
       });
+      // map.once('moveend', () => { setIsZoomingIn(null); })
     }
   };
+
+  const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
+    if(mapRef.current){
+      timeoutManager.clearTimeout();
+      setIsZoomingIn(false);
+      flyTo(newCoords, mapRef.current.getZoom());
+      // mapRef.current.getMap().panTo(newCoords, {duration:1000});
+    }
+  };
+
+
+  // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
+  //   if(mapRef.current){
+  //     timeoutManager.clearTimeout();
+  //     const map = mapRef.current.getMap(); // Get the map instance
+  //     const currentCoords = map.getCenter(); // Get current map center
+  //     const zoomNow = map.getZoom()
+
+  //     // Calculate midpoint coordinates
+  //     const midCoords = {
+  //       lon: (currentCoords.lng + newCoords.lon) / 2,
+  //       lat: (currentCoords.lat + newCoords.lat) / 2,
+  //     };
+      
+  //     setIsZoomingIn(false);
+
+  //     zoom = zoom>=ZOOMOUT_ZOOM ? zoom : 4;
+      
+  //     const halfzoom = ((zoom - ZOOMOUT_ZOOM) / 2) + ZOOMOUT_ZOOM
+
+  //     map.flyTo({
+  //     //     // center: [midCoords.lon, midCoords.lat],
+  //         center: [newCoords.lon, newCoords.lat],
+  //     //     // center: [0,0],
+  //     //     // essential: true // this animation is considered essential with respect to prefers-reduced-motion
+  //     //     // speed: 1,
+  //         speed: zoomNow/6,
+  //         zoom: zoom,
+  //     //     // zoom: map.getZoom()
+  //         curve: 1,
+  //     });
+  //     // map.once('moveend', () => {
+  //     //   timeoutManager.setTimeout(() => {
+  //     //     map.flyTo({
+  //     //       center: [newCoords.lon, newCoords.lat],
+  //     //       // essential: true // this animation is considered essential with respect to prefers-reduced-motion
+  //     //       speed: 2,
+  //     //       zoom: zoom
+  //     //     });
+  //     //     map.once('moveend', () => { 
+  //     //       setIsZoomingIn(true);
+  //     //     });
+  //     //   }, 500);
+  //     // });
+  //   }
+  // };
 
 
   // Add event listener for keydown to advance posts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(event.key);
       if ((event.key === 'ArrowDown') && activePost) {
-        markPostRead(activePost);
+        // markPostRead(activePost);
+        unzoomActivePost();
+        // unzoomActivePosition();
         event.stopPropagation();
       } else if ((event.key === 'ArrowRight')) {
         advancePost();
+        event.stopPropagation();
+      } else if ((event.key === 'ArrowLeft')) {
+        regressPost();
+        event.stopPropagation();
+      } else if ((event.key === 'ArrowUp') && activePost) {
+        zoomActivePost();
+        // zoomActivePosition();
+        event.stopPropagation();
+      } else if ((event.key === ' ')) {
+        freezeMap();
+        event.stopPropagation();
+      } else if ((event.key === 'Enter') && activePost) {
+        markPostRead(activePost);
         event.stopPropagation();
       }
 
@@ -213,16 +383,33 @@ export function MapDisplay() {
       <Map
           ref={mapRef}
           initialViewState={{
-              latitude: coords.lat,
-              longitude: coords.lon,
-              zoom: 2
+              latitude: 50, //coords.lat,
+              longitude: 0, //coords.lon,
+              zoom: ZOOMOUT_ZOOM,
           }}
+          maxZoom={17}
+          minZoom={1}
+        //   viewState={{
+        //     latitude: 0, //coords.lat,
+        //     longitude: 0, //coords.lon,
+        //     zoom: 2,
+        //     width: 1000,
+        //     height: 1000,
+        //     bearing: 0,
+        //     pitch: 0,
+        //     padding: {top: 0,
+        //       bottom: 0,
+        //       left: 0,
+        //       right: 0}
+        // }}
           // mapStyle="mapbox://styles/mapbox/streets-v11"
           mapStyle="mapbox://styles/ryanheuser/clsfj542r03ey01pbexmje2us"
+          // mapStyle="mapbox://styles/ryanheuser/clshu3oty018v01qrfqq00tpd"
           mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
           scrollZoom={true}
           onLoad={() => setMapLoaded(true)} // Set mapLoaded to true when the map finishes loading
           // onClick={handleMapClick} // Attach the click event handler
+          projection={{name:PROJECTION}} // or any other supported projection type
       >
           {/* <NavigationControl position="top-right" /> */}
           {/* <Marker longitude={coords.lon} latitude={coords.lat} anchor="bottom" popup={popup} ref={markerRef} scale={.5} /> */}
@@ -243,13 +430,14 @@ export function MapDisplay() {
               onClick={(event) => clickPost(post,event)} // Add click handler to marker
             />
           ))}
-      {popupInfo && (
+      {popupInfo && activePost && (
         <Popup
           latitude={popupInfo.lat}
           longitude={popupInfo.lon}
           closeButton={false}
           closeOnClick={true}
-          anchor="top"
+          offset={activePost.size * 40} // Adjust this value as needed to position the popup above the marker
+          anchor="bottom" // This makes the popup's bottom edge aligned with the marker position      
           onClose={() => setPopupInfo(null)} // Reset clicked marker id on close
       >
         <div dangerouslySetInnerHTML={{ __html: popupInfo.content }} />
@@ -261,15 +449,34 @@ export function MapDisplay() {
       {/* <IonToolbar className="toolbar"> */}
             <IonButton className='prevbtn' fill="clear" onClick={regressPost}>
               <IonIcon aria-hidden="true" icon={arrowBackOutline} />
-              <IonLabel>Prev</IonLabel>
+              {/* <IonLabel>Prev</IonLabel> */}
             </IonButton>
+
+
+            {/* <IonButton className='readbtn' fill="clear" onClick={isZoomingIn ? unzoomActivePost : zoomActivePost}>
+              <IonIcon aria-hidden="true" icon={isZoomingIn ? globeOutline : locateOutline} />
+            </IonButton> */}
+            
+            <IonButton className='readbtn' fill="clear" onClick={markActivePostRead}>
+              <IonIcon aria-hidden="true" icon={repeatOutline} />
+              {/* <IonLabel>Read</IonLabel> */}
+            </IonButton>
+            
+            <IonButton className='readbtn' fill="clear" onClick={markActivePostRead}>
+              <IonIcon aria-hidden="true" icon={heartOutline} />
+              {/* <IonLabel>Read</IonLabel> */}
+            </IonButton>
+
             <IonButton className='readbtn' fill="clear" onClick={markActivePostRead}>
               <IonIcon aria-hidden="true" icon={checkmarkOutline} />
-              <IonLabel>Read</IonLabel>
+              {/* <IonLabel>Read</IonLabel> */}
             </IonButton>
-            <IonButton className='nextbtn' fill="clear" onClick={advancePost}>
-              <IonLabel>Next</IonLabel>
 
+
+
+            
+            <IonButton className='nextbtn' fill="clear" onClick={advancePost}>
+              {/* <IonLabel>Next</IonLabel> */}
               <IonIcon aria-hidden="true" icon={arrowForwardOutline} />
             </IonButton>
             </div>

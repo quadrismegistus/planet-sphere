@@ -2,8 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { accessToken } from 'mapbox-gl';
-
-const REACT_APP_API_URL="http://134.209.216.92:8000"
+import { REACT_APP_API_URL } from '../vars'
 
 
 // Function to authenticate user by sending credentials to the backend

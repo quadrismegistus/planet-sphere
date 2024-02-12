@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
 import axios from 'axios';
-const REACT_APP_API_URL="http://134.209.216.92:8000"
+import { REACT_APP_API_URL } from '../vars'
 
 // Define the shape of your context data
 interface GeolocationContextType {

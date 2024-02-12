@@ -35,7 +35,7 @@ const TabBar: React.FC = () => {
             <Route path="/" component={MapTab} exact />
           </IonRouterOutlet>
 
-          <IonTabBar slot="top">
+          <IonTabBar slot="top" className="tabbar">
             
             <IonTabButton tab="logo" href="/">
               <h1 className='logo'>flatearth</h1>
@@ -43,22 +43,22 @@ const TabBar: React.FC = () => {
             
             <IonTabButton tab="map" href="/">
               <IonIcon aria-hidden="true" icon={mapOutline} />
-              <IonLabel>Map</IonLabel>
+              {/* <IonLabel>Map</IonLabel> */}
             </IonTabButton>
 
             <IonTabButton tab="post" onClick={showPostModal}>
               <IonIcon aria-hidden="true" icon={newspaperOutline} />
-              <IonLabel>Post</IonLabel>
+              {/* <IonLabel>Post</IonLabel> */}
             </IonTabButton>
 
             <IonTabButton tab="acct" onClick={showLoginModal}>
               <IonIcon aria-hidden="true" icon={personOutline} />
-              <IonLabel>User</IonLabel>
+              {/* <IonLabel>User</IonLabel> */}
             </IonTabButton>
 
             <IonTabButton tab="settings">
               <IonIcon aria-hidden="true" icon={settingsOutline} />
-              <IonLabel>Settings</IonLabel>
+              {/* <IonLabel>Settings</IonLabel> */}
             </IonTabButton>
 
             

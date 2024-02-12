@@ -31,6 +31,7 @@
     "axios": "^1.6.7",
     "cordova-plugin-android-permissions": "^1.1.5",
     "cordova-plugin-request-location-accuracy": "^2.3.0",
+    "geolib": "^3.3.4",
     "google-map-react": "^2.2.1",
     "ionicons": "^7.0.0",
     "ipinfo": "^1.5.1",
