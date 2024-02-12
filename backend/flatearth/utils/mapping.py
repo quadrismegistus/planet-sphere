@@ -164,12 +164,12 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=0.5, 
     def html_post(post):
         return f'''
 <div class="post">
-<div class="post_meta">
-{post['user']['name']}<br>
-{how_long_ago(post['timestamp'])}<br>
-from {post['place']['name']}
-</div>
 <div class="post_txt">{post["text"]["txt"]}</div>
+<div class="post_meta">
+—<span class="post_user">{post['user']['name']}</span>, 
+<span class="post_time">{how_long_ago(post['timestamp'])}</span>
+from <span class="post_place">{post['place']['name']}</span>
+</div>
 '''
     def add_post(post):
         posts_ld.append(dict(

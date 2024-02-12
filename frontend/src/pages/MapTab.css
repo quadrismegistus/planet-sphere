@@ -9,13 +9,20 @@
     pointer-events: none;
 }
 
+.dark .mapboxgl-popup-content, .dark .mapboxgl-popup {
+    color:#fff;
+    background-color: #1f1f1f;
+    pointer-events: none;
+}
+
+
 .mapboxgl-popup-close-button {
     filter: invert(1);
 }
 
 .logo { 
     margin:auto;
-    color:#222;
+    color:#111;
     font-family: cursive, Georgia, 'Times New Roman', Times, serif;
     letter-spacing: .3rem;
 }
@@ -29,7 +36,10 @@ body.dark {
   }
 
 .dark .logo {
-    color:#eee;
+    color:#efefef;
+}
+.mapContainer:focus {
+    outline: none;
 }
 
 .mapContainer {
@@ -46,8 +56,6 @@ body.dark {
     vertical-align: top;
 }
 
-.post_txt { font-size: .9rem; }
-.post_meta { margin-bottom:1rem;  text-align: center;}
 
 .mapboxgl-popup { min-width:17rem; background-color: rgba(255,255,255,.85); border-radius: 5px; backdrop-filter: blur(5px);}
 
@@ -84,21 +92,32 @@ ion-tab-bar {
 }
 
 
-
+.toolbtnbar {
+    /* width:66v
+    w; */
+    margin: 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+}
 
 /* Style for the toolbar containing the buttons */
 .toolbar {
-    --border:none;
+    /* --border:none; */
+    border: 1px solid #404040;
     padding:.1em;
     text-align: center;
     height:fit-content;
     position:fixed;
     bottom:0;
-    height:50px;
+    height:56px;
     /* pointer-events: none; */
     width:100%;
     display:flex;
-    justify-content: space-between; /* This will space out the buttons */
+    /* width:auto; */
+    /* height:100px; */
+    margin: inherit auto;
+    justify-content: space-evenly; /* This will space out the buttons */
     align-items: center; /* This will vertically center the buttons if the toolbar has a height */
 }  
   /* General button styling to match IonTabButton */
@@ -114,12 +133,13 @@ ion-tab-bar {
     --ripple-color: transparent; /* Remove ripple effect if needed */
     /* --color: #ddd; */
     /* pointer-events: auto; */
-    /* padding-left:auto; */
-    align-items: left;
+    margin-left:10px;
+    margin-right:10px;
+    /* align-items: left; */
   }
 
   .toolbar ion-button { color: #111;}
-  .dark .toolbar ion-button { color: #eee;}
+  .dark .toolbar ion-button { color: #efefef;}
 
 
   ion-tab-bar { background-color: #eee;}
@@ -128,7 +148,7 @@ ion-tab-bar {
   .toolbar { background-color: #eee;}
   .dark .toolbar { background-color: #1f1f1f;}
 
-  .dark ion-tab-button { color: #eee; }
+  .dark ion-tab-button { color: #efefef; }
   ion-tab-button { color: #111; }
 
 
@@ -160,3 +180,44 @@ ion-tab-bar {
 
 
 /* ion-content, ion-page {--background:transparent} */
+
+
+*:focus {
+outline: none;
+}
+
+
+
+
+
+.post { }
+/* .post_txt { font-size: .9rem; } */
+.post_txt { font-size:.9rem; }
+.postbar .post_txt { font-size:1rem; }
+/* .post_meta { margin-bottom:1rem;  text-align: center;} */
+.post_meta { margin-top:.5rem; font-size:.9rem; font-style: italic; }
+.postbar .post_meta { }
+
+
+.postbar { 
+    position: fixed; bottom:0;
+    /* max-width: 100vw; */
+    /* min-width:400px; */
+    /* margin: 0 auto; */
+    /* width:fit-content; */
+    width: 100vw;
+    /* text-align: center; */
+    /* margin-bottom:56px; */
+    margin: 0 auto 56px auto;
+    display: flex;
+    align-items: center;
+    /* border:2px solid red; */
+    /* background-color: rgba(255,255,255,.666); */
+}
+
+
+.postbar .post { background-color: #eee; border-radius: 10px 10px 0 0;}
+.dark .postbar .post { background-color: #1f1f1f;}
+
+
+.postbar .post { max-width:600px; margin:0 auto; padding:1rem;}

@@ -136,7 +136,7 @@ export function MapDisplay() {
     if (postsQueue.length) {
       const newActivePost = postsQueue.pop(); // Remove the last element
       if (newActivePost) {
-        activatePost(newActivePost);
+        activatePost(newActivePost, true);
         // Add the post back to the start of the queue
         setPostsQueue(postsQueue => [newActivePost, ...postsQueue]);
       }
@@ -180,13 +180,13 @@ export function MapDisplay() {
   const zoomActivePost = () => {
     if(activePost && mapRef && mapRef.current) {
       setIsZoomingIn(false);
-      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()+1, 1);
+      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()+2, 1);
     }
   }
   const unzoomActivePost = () => {
     if(activePost && mapRef && mapRef.current) {
       setIsZoomingIn(false);
-      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()-1, 1);
+      flyTo({lat: activePost.lat, lon:activePost.lon}, mapRef.current.getZoom()-2, 1);
     }
   }
 
@@ -273,14 +273,33 @@ export function MapDisplay() {
     }
   };
 
-  const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
+  // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
+  //   if(mapRef.current){
+  //     timeoutManager.clearTimeout();
+  //     setIsZoomingIn(false);
+  //     const zoomNow = mapRef.current.getZoom()
+  //     const minZoom = 3;
+  //     flyTo(newCoords, zoomNow < minZoom ? minZoom : zoomNow);
+  //     // mapRef.current.getMap().panTo(newCoords, {duration:1000});
+  //   }
+  // };
+  // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
+  //   if(mapRef.current){
+  //     const map = mapRef.current.getMap()
+  //     timeoutManager.clearTimeout();
+  //     setIsZoomingIn(false);
+  //     flyTo(null, ZOOMOUT_ZOOM, 2);
+  //     timeoutManager.setTimeout(() => {
+  //       flyTo(newCoords, ZOOMIN_ZOOM, .05);
+  //     }, 2000);
+  //   }
+  // };
+  const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=.5) => {
     if(mapRef.current){
-      timeoutManager.clearTimeout();
       setIsZoomingIn(false);
       const zoomNow = mapRef.current.getZoom()
       const minZoom = 3;
-      flyTo(newCoords, zoomNow < minZoom ? minZoom : zoomNow);
-      // mapRef.current.getMap().panTo(newCoords, {duration:1000});
+      flyTo(newCoords, zoom ? zoom : (zoomNow>minZoom ? zoomNow : minZoom), speed);
     }
   };
 
@@ -385,12 +404,12 @@ export function MapDisplay() {
       <Map
           ref={mapRef}
           initialViewState={{
-              latitude: 50, //coords.lat,
+              latitude: 0, //coords.lat,
               longitude: 0, //coords.lon,
               zoom: ZOOMOUT_ZOOM,
           }}
           maxZoom={17}
-          minZoom={1}
+          minZoom={0}
         //   viewState={{
         //     latitude: 0, //coords.lat,
         //     longitude: 0, //coords.lon,
@@ -428,9 +447,11 @@ export function MapDisplay() {
               key={post.id.toString()+'-'+index.toString()} // Use unique id for key, not index
               longitude={post.lon}
               latitude={post.lat}
-              scale={post.size}
+              // scale={post.size}
               onClick={(event) => clickPost(post,event)} // Add click handler to marker
-            />
+            >
+              {getMarkerSVG(post.size, (activePost && activePost.id==post.id) ? "red" : "blue")}
+            </Marker>
           ))}
       {popupInfo && activePost && (
         <Popup
@@ -444,10 +465,18 @@ export function MapDisplay() {
       >
         <div dangerouslySetInnerHTML={{ __html: popupInfo.content }} />
         </Popup>
+
+        // <Marker latitude={activePost.lat} longitude={activePost.lon}>
+        //   {getMarkerSVG(activePost.size, '#ff0')}
+        // </Marker>
+
             )}
       </Map>
 
+
+
       <div className='toolbar'>
+        {/* <div className='toolbtnbar'> */}
       {/* <IonToolbar className="toolbar"> */}
             <IonButton className='prevbtn' fill="clear" onClick={regressPost}>
               <IonIcon aria-hidden="true" icon={arrowBackOutline} />
@@ -484,9 +513,25 @@ export function MapDisplay() {
             </div>
           {/* </IonToolbar> */}
       
-
+          {popupInfo && (<div className="postbar" dangerouslySetInnerHTML={{ __html: popupInfo.content }} />)}
+      
+          {/* </div> */}
       </div>
   );
+}
+
+
+const getMarkerSVG = (size:number, color:string = "#ffe") => {
+  return (
+    // <svg height={size*50} width={size*35} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    //   <g fill="none" stroke="#000" stroke-width="1">
+    //       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    //       <circle cx="12" cy="9" r="1" fill="#000" />
+    //   </g>
+    //   <path d="M12 22s-7-7.75-7-13 3.13-7 7-7 7 3.13 7 7-7 13-7 13z" fill={color} />
+    // </svg>
+  <svg height={size*50} width={size*50} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><path fill={color} stroke="#000" fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>
+  )
 }
 
 export { MAPBOX_ACCESS_TOKEN };
