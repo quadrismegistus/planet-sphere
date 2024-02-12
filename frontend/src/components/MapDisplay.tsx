@@ -16,7 +16,7 @@ const MAPBOX_ACCESS_TOKEN_b64 = 'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmp
 const MAPBOX_ACCESS_TOKEN = atob(MAPBOX_ACCESS_TOKEN_b64);
 
 const PROJECTION = 'lambertConformalConic';
-const ZOOMOUT_ZOOM = 2;
+const ZOOMOUT_ZOOM = 1;
 const ZOOMIN_ZOOM = 16;
 
 
@@ -111,7 +111,7 @@ export function MapDisplay() {
   // Call advancePost once both the map and posts have loaded
   useEffect(() => {
     if (postsLoaded && mapLoaded) {
-      advancePost();
+      setTimeout(() => { advancePost(); }, 1000);
     }
   }, [postsLoaded, mapLoaded]);
 
@@ -277,7 +277,9 @@ export function MapDisplay() {
     if(mapRef.current){
       timeoutManager.clearTimeout();
       setIsZoomingIn(false);
-      flyTo(newCoords, mapRef.current.getZoom());
+      const zoomNow = mapRef.current.getZoom()
+      const minZoom = 3;
+      flyTo(newCoords, zoomNow < minZoom ? minZoom : zoomNow);
       // mapRef.current.getMap().panTo(newCoords, {duration:1000});
     }
   };
