@@ -231,3 +231,28 @@ def get_color(name):
     color = RGB_color_picker(name)
     color.set_saturation(1)
     return color.hex
+
+
+
+url_city_xlsx='https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/exports/csv?lang=en&timezone=America%2FNew_York&use_labels=true&delimiter=%3B'
+
+def gen_city_data():
+    ifn=os.path.join(PATH_DATA,'geonames-all-cities-with-a-population-1000.xlsx')
+    if not os.path.exists(ifn):
+        wget.download(url_city_xlsx, ifn)
+
+    df = pd.read_excel(ifn)
+
+    df['lat']=[float(x.split(', ')[0]) for x in df.Coordinates]
+    df['lon']=[float(x.split(', ')[1]) for x in df.Coordinates]
+    dfq=df.query('Population>=1000')[['Name', 'Country name EN','lat','lon','Geoname ID']]
+    dfq.columns=['city','country','lat','lon','geonames_id']
+    # dfq.to_json(ofn, orient='records')
+
+    ofn=os.path.join(PATH_FRONTEND_STATIC, 'cities.json.gz')
+    dfq.to_json(
+        ofn,
+        orient='records',
+        force_ascii=False,
+    )
+    return dfq

@@ -16,7 +16,7 @@ import {
   IonItem
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { settingsOutline, personOutline, mapOutline, journalOutline, newspaperOutline } from 'ionicons/icons';
+import { settingsOutline, personOutline, mapOutline, journalOutline, newspaperOutline, pencilOutline, locationOutline, locateOutline } from 'ionicons/icons';
 import React, {useEffect,useState} from 'react';
 import MapTab from '../pages/MapTab';
 import UserTab from '../pages/UserTab';
@@ -26,7 +26,7 @@ import { useModal } from './ModalProvider'
 
 
 const TabBar: React.FC = () => {
-  const { showPostModal, showLoginModal } = useModal();
+  const { showPostModal, showLoginModal, showLocationModal } = useModal();
 
   return (
     <IonReactRouter>
@@ -41,13 +41,15 @@ const TabBar: React.FC = () => {
               <h1 className='logo'>flatearth</h1>
             </IonTabButton>
             
-            <IonTabButton tab="map" href="/">
+            {/* <IonTabButton tab="map" href="/">
               <IonIcon aria-hidden="true" icon={mapOutline} />
-              {/* <IonLabel>Map</IonLabel> */}
-            </IonTabButton>
+            </IonTabButton> */}
+            
+            
+
 
             <IonTabButton tab="post" onClick={showPostModal}>
-              <IonIcon aria-hidden="true" icon={newspaperOutline} />
+              <IonIcon aria-hidden="true" icon={pencilOutline} />
               {/* <IonLabel>Post</IonLabel> */}
             </IonTabButton>
 
@@ -55,7 +57,11 @@ const TabBar: React.FC = () => {
               <IonIcon aria-hidden="true" icon={personOutline} />
               {/* <IonLabel>User</IonLabel> */}
             </IonTabButton>
-
+            
+            <IonTabButton tab="location" onClick={showLocationModal}>
+              <IonIcon aria-hidden="true" icon={locationOutline} />
+            </IonTabButton>
+            
             <IonTabButton tab="settings">
               <IonIcon aria-hidden="true" icon={settingsOutline} />
               {/* <IonLabel>Settings</IonLabel> */}

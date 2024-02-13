@@ -16,9 +16,9 @@ const MAPBOX_ACCESS_TOKEN_b64 = 'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmp
 const MAPBOX_ACCESS_TOKEN = atob(MAPBOX_ACCESS_TOKEN_b64);
 
 const PROJECTION = 'lambertConformalConic';
-const ZOOMOUT_ZOOM = 1;
+const ZOOMOUT_ZOOM = 0;
 const ZOOMIN_ZOOM = 16;
-
+const SHOW_POPUPS = false;
 
 
 const createTimeoutManager = () => {
@@ -232,6 +232,16 @@ export function MapDisplay() {
       const map = mapRef.current.getMap(); // Get the map instance
       const latlng=map.getCenter()
       if(newCoords==null) newCoords={lat:latlng.lat, lon:latlng.lng}
+      const newLon = newCoords.lon
+      // const newLat = getAdjustedLatitudeForPin(
+      //   newCoords.lat,
+      //   map.getZoom(),
+      //   25
+      // )
+      const newLat = newCoords.lat;
+      const newCoordsOffset = {lat:newLat, lon:newLon}
+
+
       
       const calculateFlyToSpeed = (startCoords: Coordinates, endCoords: Coordinates): number => {
         // Calculate distance in meters
@@ -262,9 +272,9 @@ export function MapDisplay() {
     
     
       const currentCoords = map.getCenter(); // Get current map center
-      speed = speed ? speed : calculateFlyToSpeed({lat: currentCoords.lng, lon:currentCoords.lng}, newCoords);
+      speed = speed ? speed : calculateFlyToSpeed({lat: currentCoords.lng, lon:currentCoords.lng}, newCoordsOffset);
       map.flyTo({
-          center: [newCoords.lon, newCoords.lat],
+          center: [newCoordsOffset.lon, newCoordsOffset.lat],
           speed: speed,
           zoom: ((zoom!=null) ? zoom : map.getZoom())
           // curve: 1
@@ -283,25 +293,33 @@ export function MapDisplay() {
   //     // mapRef.current.getMap().panTo(newCoords, {duration:1000});
   //   }
   // };
-  // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
-  //   if(mapRef.current){
-  //     const map = mapRef.current.getMap()
-  //     timeoutManager.clearTimeout();
-  //     setIsZoomingIn(false);
-  //     flyTo(null, ZOOMOUT_ZOOM, 2);
-  //     timeoutManager.setTimeout(() => {
-  //       flyTo(newCoords, ZOOMIN_ZOOM, .05);
-  //     }, 2000);
-  //   }
-  // };
-  const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=.5) => {
+  const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
     if(mapRef.current){
+      const map = mapRef.current.getMap()
+      const currentCoords = map.getCenter(); // Get current map center
+      const midCoords = {
+        lon: (currentCoords.lng + newCoords.lon) / 2,
+        lat: (currentCoords.lat + newCoords.lat) / 2,
+      };
+  
+      timeoutManager.clearTimeout();
       setIsZoomingIn(false);
-      const zoomNow = mapRef.current.getZoom()
-      const minZoom = 3;
-      flyTo(newCoords, zoom ? zoom : (zoomNow>minZoom ? zoomNow : minZoom), speed);
+      flyTo(midCoords, ZOOMOUT_ZOOM, 3);
+      timeoutManager.setTimeout(() => {
+      // map.on('moveend',() => {
+        flyTo(newCoords, ZOOMIN_ZOOM, .25);
+      }, 1000);
+      // });
     }
   };
+  // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=.5) => {
+  //   if(mapRef.current){
+  //     setIsZoomingIn(false);
+  //     const zoomNow = mapRef.current.getZoom()
+  //     const minZoom = 3;
+  //     flyTo(newCoords, zoom ? zoom : (zoomNow>minZoom ? zoomNow : minZoom), speed);
+  //   }
+  // };
 
 
   // const flyToZoomOut = (newCoords: Coordinates, zoom:number=0, speed:number=1) => {
@@ -453,7 +471,7 @@ export function MapDisplay() {
               {getMarkerSVG(post.size, (activePost && activePost.id==post.id) ? "red" : "blue")}
             </Marker>
           ))}
-      {popupInfo && activePost && (
+      {SHOW_POPUPS && popupInfo && activePost && (
         <Popup
           latitude={popupInfo.lat}
           longitude={popupInfo.lon}
@@ -533,5 +551,25 @@ const getMarkerSVG = (size:number, color:string = "#ffe") => {
   <svg height={size*50} width={size*50} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><path fill={color} stroke="#000" fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>
   )
 }
+
+const getAdjustedLatitudeForPin = (centerLat: number, zoomLevel: number, pixelOffset: number): number => {
+  // Earth's radius in meters
+  const earthRadius: number = 6378137;
+  // Convert latitude to radians
+  const latRad: number = centerLat * (Math.PI / 180);
+  // Calculate scale from zoom level
+  const scale: number = 256 * Math.pow(2, zoomLevel);
+  // Calculate meters per pixel
+  const metersPerPixel: number = Math.cos(latRad) * (2 * Math.PI * earthRadius) / scale;
+  // Calculate the latitude offset in degrees
+  const offsetLat: number = pixelOffset * metersPerPixel / earthRadius * (180 / Math.PI);
+
+  const newLat = centerLat - offsetLat;
+  return (-90<=newLat && newLat<=90) ? newLat : centerLat
+}
+
+// Example usage:
+// const newCenterLat: number
+
 
 export { MAPBOX_ACCESS_TOKEN };

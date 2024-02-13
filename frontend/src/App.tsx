@@ -6,6 +6,7 @@ import {
 } from '@ionic/react';
 import React, {useEffect} from 'react';
 import { ModalProvider } from './components/ModalProvider'
+import { ReverseGeocoderProvider } from './components/ReverseGeocoder'
 import { GeolocationProvider } from './components/GeolocationProvider';
 import TabBar from './components/TabBar'
 import { AuthProvider } from './components/Authentication';
@@ -56,13 +57,15 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-      <ModalProvider>
-        <AuthProvider>
-      <GeolocationProvider>
-      <TabBar />
-      </GeolocationProvider>
+      <AuthProvider>
+        <GeolocationProvider>
+          <ReverseGeocoderProvider>
+            <ModalProvider>
+              <TabBar />
+            </ModalProvider>
+          </ReverseGeocoderProvider>
+        </GeolocationProvider>
       </AuthProvider>
-      </ModalProvider>
     </IonApp>
   );
 }

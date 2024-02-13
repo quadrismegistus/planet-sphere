@@ -35,6 +35,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
     const startWatchingPosition = async () => {
       const watchId = await Geolocation.watchPosition({}, (position, err) => {
         if (!err && position) {
+
           setCoords({
             lat: position.coords.latitude,
             lon: position.coords.longitude,
@@ -61,7 +62,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
 
   const fetchLocationInfo = async (lat: number, lon: number) => {
     console.log(lat,lon,coords,'coords');
-    if (Math.abs(lat - coords.lat) > 0.01 || Math.abs(lon - coords.lon) > 0.01) {
+    if (Math.abs(lat - coords.lat) > 0.1 || Math.abs(lon - coords.lon) > 0.1) {
         try {
         // Replace 'YOUR_API_ENDPOINT' with your actual API endpoint
         const response = await axios.post(REACT_APP_API_URL+'/places/query', { lat, lon });

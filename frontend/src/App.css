@@ -5,7 +5,9 @@ ion-tab-bar {
     left:0; */
     z-index:10;
   }
-
+.logo {
+  padding-left:.75rem;
+}
 ion-tab-button {
     background-color: rgba(0,0,0,0);
     z-index:1000;
@@ -21,4 +23,8 @@ ion-tab-button {
 
 #root {
   height:30vh;
+}
+
+.mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib {
+  display: none;
 }

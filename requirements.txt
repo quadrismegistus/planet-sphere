@@ -1,4 +1,5 @@
 # backend reqs
+wget
 fastapi[all]
 geoalchemy2
 psycopg2-binary

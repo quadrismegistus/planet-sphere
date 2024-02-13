@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import asyncio
 from pprint import pprint
+import wget
 import random
 import bcrypt
 import os
@@ -45,9 +46,10 @@ from datetime import datetime, timedelta
 PATH_DATA = os.path.expanduser('~/.cache/flatearth')
 os.makedirs(PATH_DATA,exist_ok=True)
 cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
-PATH_REPO = os.path.dirname(os.path.dirname(__file__))
+PATH_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..'))
 PATH_REPO_DATA = os.path.join(PATH_REPO,'flatearth','data')
-
+PATH_FRONTEND = os.path.join(PATH_REPO,'frontend')
+PATH_FRONTEND_STATIC = os.path.join(PATH_FRONTEND,'public')
 PATHS_SPATIALITE = ['/opt/homebrew/lib/mod_spatialite.dylib']
 
 SECRET_KEY=b'all the galaxy a stage'
