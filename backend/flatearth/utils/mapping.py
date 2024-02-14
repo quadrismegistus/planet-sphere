@@ -182,6 +182,7 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=0.5, 
             num_likes=len(post['likes']),
             data=to_json(post),
             html=html_post(post),
+            zoom=int(2 * post['place']['long_name'].count(', ')),
             reply_to=post.get('reply_to',{}).get('id',0),
             repost_of=post.get('repost_of',{}).get('id',0)
         ))
@@ -213,13 +214,14 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=0.5, 
         df['color']=df['user_id'].apply(get_color)
 
         s=df['num_likes']
-        df['size'] = max_size if len(df)<3 else dfs.apply(
+        mid_size = max_size - ((max_size - min_size) / 2)
+        df['size'] = mid_size if len(s)<3 else s.apply(
             lambda n: translate_range(
                 n, 
                 (s.min(), s.max()),
                 (min_size,max_size)
             )
-        )
+        ).fillna(mid_size)
     
     if jiggle_positions:
         df['lat']=df['lat'].apply(jiggle)

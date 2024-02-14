@@ -20,7 +20,6 @@ const MapTab: React.FC = () => {
           <PostModal />
           <LoginModal />
           <SettingsModal />
-
       </IonContent>
     </IonPage>
   );

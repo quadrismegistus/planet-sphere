@@ -120,7 +120,7 @@ class Post(Base):
             timestamp=self.timestamp,
             user=self.user,
             text=self.text,
-            place=self.place,
+            place=self.place.to_dict(is_root=False),
             repost_of=self.repost_of,
             reply_to=self.reply_to,
             likes=[u.to_dict() for u in self.likes],

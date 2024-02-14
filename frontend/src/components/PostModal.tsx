@@ -29,7 +29,7 @@ const PostModal: React.FC = () => {
     const { user } = useAuth();
     const { chosenGeonamesId } = useReverseGeocoder();
     const { value, charsRemaining, handleChange } = useTextareaWithLimit(360);
-
+    const [errormsg, SetErrormsg] = useState('');
 
     useEffect(() => {
         if(!user && postIsOpen) {
@@ -42,14 +42,17 @@ const PostModal: React.FC = () => {
       if(!user) return
 
       try {
-          const response = await axios.post(REACT_APP_API_URL+'/login', {
-            username: user.username,
+        const message = {
             access_token:user.accessToken,
-            geonames_id:chosenGeonamesId
-          });
+            post_txt: value,
+            geonames_id:chosenGeonamesId,
+          };
+          console.log('message',message);
+          const response = await axios.post(REACT_APP_API_URL+'/users/post', message);
           console.log('posted:',response.data);
-      } catch (error) {
-        // Handle any errors, such as showing login failure messages
+          hidePostModal();
+      } catch (error:any) {
+        SetErrormsg(error.toString())
         throw error;
       }
     };
@@ -79,7 +82,8 @@ const PostModal: React.FC = () => {
         onIonInput={handleChange}
       />
       <LocationSelect label="from:" />
-      <IonButton type='submit' fill='clear' style={{float:'right'}} onClick={handleSubmit}>Post</IonButton>        
+      <IonButton type='submit' fill='clear' style={{float:'right'}} onClick={handleSubmit}>Post</IonButton>
+      <div className='error'>{errormsg}</div>
       </IonContent>
       </IonModal>
   );

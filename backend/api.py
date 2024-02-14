@@ -53,19 +53,21 @@ async def get_posts(query:PostQuery):
     """
     Endpoint to receive latitude and longitude as path parameters and return them.
     """
-    logger.debug(query)
-    df = post_map_df(seen=query.seen).rename(columns={'html':'content'})
-    return df[['id','lat','lon','content','size']].sample(frac=1).to_dict('records')
+    # logger.debug(query)
+    # df = post_map_df(seen=query.seen).rename(columns={'html':'content'})
+    # return df[['id','lat','lon','content','size','zoom']].sample(frac=1).to_dict('records')
+    return [post.data for post in Post.latest()]
 
 
 @app.get("/posts/latest")
-async def get_posts():
+async def latest_posts():
     """
     Endpoint to receive latitude and longitude as path parameters and return them.
     """
-    df = post_map_df().rename(columns={'html':'content'})
+    # df = post_map_df().rename(columns={'html':'content'})
     
-    return df[['id','lat','lon','content','size']].sample(frac=1).to_dict('records')
+    # return df[['id','lat','lon','content','size']].sample(frac=1).to_dict('records')
+    return [post.data for post in Post.latest()]
 
 
 
@@ -112,8 +114,9 @@ class PostQuery(BaseModel):
     post_txt: str
     geonames_id: int
 
-@app.post("/login")
+@app.post("/users/post")
 async def make_post(query:PostQuery):
+    print(query)
     username = verify_access_token(query.access_token)
     user = User.get(name=username)
     post = user.post(query.post_txt, geonames_id=query.geonames_id)

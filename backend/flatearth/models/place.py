@@ -36,12 +36,12 @@ class Place(Base):
                 for place in self.contained_by
             ] 
         )
-        odx = {
-            **odx_mine,
-            **{k:v for k,v in self.geonames_data.items() if k not in {'geonameId','lng','toponymName'}},
-            **odx_mine
-        }
-        return odx
+        # odx = {
+        #     **odx_mine,
+        #     **{k:v for k,v in self.geonames_data.items() if k not in {'geonameId','lng','toponymName'}},
+        #     **odx_mine
+        # }
+        return odx_mine
     
     @classmethod
     def from_geo(self, geo):

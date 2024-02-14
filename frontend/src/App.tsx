@@ -8,6 +8,7 @@ import React, {useEffect} from 'react';
 import { ModalProvider } from './components/ModalProvider'
 import { ReverseGeocoderProvider } from './components/ReverseGeocoder'
 import { GeolocationProvider } from './components/GeolocationProvider';
+import { TimelineProvider } from './components/TimelineProvider'
 import TabBar from './components/TabBar'
 import { AuthProvider } from './components/Authentication';
 
@@ -62,7 +63,9 @@ const App: React.FC = () => {
         <GeolocationProvider>
           <ReverseGeocoderProvider>
             <ModalProvider>
-              <TabBar />
+              <TimelineProvider>
+                <TabBar />
+              </TimelineProvider>
             </ModalProvider>
           </ReverseGeocoderProvider>
         </GeolocationProvider>

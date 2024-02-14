@@ -1,0 +1,11 @@
+.post_txt { 
+    font-size:1.1rem; 
+}
+
+.post_meta { 
+  margin-bottom:1rem; 
+  font-size:.9rem; 
+  font-style: italic; 
+}
+
+.post { padding:.5rem;}

@@ -429,19 +429,19 @@ class Geoname:
     
     @cached_property
     def loc(self):
-        return self._loc if self._loc is not None else self.tree[0]
+        return self._loc if self._loc is not None else (self.tree[0] if self.tree else None)
 
     @cached_property
     def tree(self):
         return self._tree if self._tree is not None else self.query(self.id)
     
     @property
-    def lat(self): return float(self.loc.lat)
+    def lat(self): return float(self.loc.lat) if self.loc is not None else 0
     @property
-    def lon(self): return float(self.loc.lng)
+    def lon(self): return float(self.loc.lng) if self.loc is not None else 0
 
     @property
-    def data(self): return self.loc.raw
+    def data(self): return self.loc.raw if self.loc is not None else {}
 
     @property
     def long_name(self):
