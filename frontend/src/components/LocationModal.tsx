@@ -1,33 +1,33 @@
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonInput, IonItem, IonLabel } from '@ionic/react';
 import { useModal } from './ModalProvider';
-import React, { useState, useEffect, useRef } from 'react';
-import {
-    IonModal,
-  } from '@ionic/react';
-import { useReverseGeocoder,ReverseGeocoderLocationType, defaultReverseGeocoderLocationType } from './ReverseGeocoder';
+import React from 'react';
+import { useReverseGeocoder } from './ReverseGeocoder';
 import { useGeolocation } from './GeolocationProvider';
 
-const LocationModal: React.FC = () => {
-    const { locationIsOpen, hideLocationModal, showLocationModal } = useModal();
-    const { cityInfo } = useReverseGeocoder();
+const LocationSelect: React.FC = () => {
+    const { settingsIsOpen, hideSettingsModal, showSettingsModal } = useModal();
+    const { placeInfo, chosenGeonamesId, setChosenGeonamesId } = useReverseGeocoder();
     const { coords, loading } = useGeolocation();
 
-    return (
-        <IonModal isOpen={locationIsOpen} onDidDismiss={hideLocationModal} className="side-modal">
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Location</IonTitle>
-                </IonToolbar>
-            </IonHeader>
-        {/* {cityInfo && cityInfo.cityInfo && cityInfo.cityInfo.city && ( */}
-          <IonContent className="ion-padding">
-            {cityInfo && cityInfo.city && (
-              <div>The closest city to you is {cityInfo.city}, {cityInfo.country}, about {Math.round(cityInfo.distance)} km away. Geonames ID = {cityInfo.geonames_id}.</div>
-            )}
-          </IonContent>
-        {/* )} */}
-        </IonModal>
-    );
+    const handleSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setChosenGeonamesId(parseInt(event.target.value));
+      console.log('chosen geonames id =',chosenGeonamesId);
+    };
+
+    const getPlaceInfoContent = () => {
+      if(placeInfo == null) return <div>Loading</div>;
+      const places = [placeInfo].concat(placeInfo.contained_by);
+      return (
+        <select name="geonames_id" onChange={handleSelectionChange}>
+        {places.map((place) => (
+          <option key={place.geonames_id} value={place.geonames_id}>
+            {place.name}
+          </option>
+        ))}
+        </select>
+      )
+    }
+
+    return getPlaceInfoContent();
 }
 
-export default LocationModal;
+export default LocationSelect;

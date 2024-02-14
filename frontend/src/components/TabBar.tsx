@@ -26,7 +26,7 @@ import { useModal } from './ModalProvider'
 
 
 const TabBar: React.FC = () => {
-  const { showPostModal, showLoginModal, showLocationModal } = useModal();
+  const { showPostModal, showLoginModal, showSettingsModal } = useModal();
 
   return (
     <IonReactRouter>
@@ -44,8 +44,6 @@ const TabBar: React.FC = () => {
             {/* <IonTabButton tab="map" href="/">
               <IonIcon aria-hidden="true" icon={mapOutline} />
             </IonTabButton> */}
-            
-            
 
 
             <IonTabButton tab="post" onClick={showPostModal}>
@@ -58,11 +56,7 @@ const TabBar: React.FC = () => {
               {/* <IonLabel>User</IonLabel> */}
             </IonTabButton>
             
-            <IonTabButton tab="location" onClick={showLocationModal}>
-              <IonIcon aria-hidden="true" icon={locationOutline} />
-            </IonTabButton>
-            
-            <IonTabButton tab="settings">
+            <IonTabButton tab="settings" onClick={showSettingsModal}>
               <IonIcon aria-hidden="true" icon={settingsOutline} />
               {/* <IonLabel>Settings</IonLabel> */}
             </IonTabButton>

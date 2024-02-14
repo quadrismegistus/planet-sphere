@@ -3,31 +3,31 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface ModalContextType {
   postIsOpen: boolean;
   loginIsOpen: boolean;
-  locationIsOpen: boolean;
+  settingsIsOpen: boolean;
   setPostIsOpen: (isOpen: boolean) => void;
   hidePostModal: () => void;
   showPostModal: () => void;
   setLoginIsOpen: (isOpen: boolean) => void;
   hideLoginModal: () => void;
   showLoginModal: () => void;
-  setLocationIsOpen: (isOpen: boolean) => void;
-  hideLocationModal: () => void;
-  showLocationModal: () => void;
+  setSettingsIsOpen: (isOpen: boolean) => void;
+  hideSettingsModal: () => void;
+  showSettingsModal: () => void;
 }
 
 const defaultModalContextValue: ModalContextType = {
   postIsOpen: false,
   loginIsOpen: false,
-  locationIsOpen: false,
+  settingsIsOpen: false,
   setPostIsOpen: () => {},
   hidePostModal: () => {},
   showPostModal: () => {},
   setLoginIsOpen: () => {},
   hideLoginModal: () => {},
   showLoginModal: () => {},
-  setLocationIsOpen: () => {},
-  hideLocationModal: () => {},
-  showLocationModal: () => {},
+  setSettingsIsOpen: () => {},
+  hideSettingsModal: () => {},
+  showSettingsModal: () => {},
 };
 
 const ModalContext = createContext<ModalContextType>(defaultModalContextValue);
@@ -42,19 +42,19 @@ interface ModalProviderProps {
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   const [postIsOpen, setPostIsOpen] = useState(false);
   const [loginIsOpen, setLoginIsOpen] = useState(false);
-  const [locationIsOpen, setLocationIsOpen] = useState(false);
+  const [settingsIsOpen, setSettingsIsOpen] = useState(false);
 
   const hidePostModal = () => { console.log('hiding login'); setPostIsOpen(false); }
   const showPostModal = () => { console.log('showing post'); setPostIsOpen(true); setLoginIsOpen(false); }
   const hideLoginModal = () => { console.log('hiding login'); setLoginIsOpen(false); }
   const showLoginModal = () => { console.log('showing login'); setLoginIsOpen(true); setPostIsOpen(false); }
 
-  const hideLocationModal = () => { console.log('hiding login'); setLocationIsOpen(false); }
-  const showLocationModal = () => { console.log('showing login'); setLocationIsOpen(true); setPostIsOpen(false); }
+  const hideSettingsModal = () => { console.log('hiding login'); setSettingsIsOpen(false); }
+  const showSettingsModal = () => { console.log('showing login'); setSettingsIsOpen(true); setPostIsOpen(false); }
 
 
   return (
-    <ModalContext.Provider value={{ postIsOpen, setPostIsOpen, hidePostModal, showPostModal, loginIsOpen, hideLoginModal, showLoginModal, setLoginIsOpen, locationIsOpen, setLocationIsOpen, hideLocationModal, showLocationModal }}>
+    <ModalContext.Provider value={{ postIsOpen, setPostIsOpen, hidePostModal, showPostModal, loginIsOpen, hideLoginModal, showLoginModal, setLoginIsOpen, settingsIsOpen, setSettingsIsOpen, hideSettingsModal, showSettingsModal }}>
       {children}
     </ModalContext.Provider>
   );

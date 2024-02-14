@@ -166,9 +166,9 @@ def post_map_df(posts=None, from_color='purple', to_color='pink', min_size=0.5, 
 <div class="post">
 <div class="post_txt">{post["text"]["txt"]}</div>
 <div class="post_meta">
-—<span class="post_user">{post['user']['name']}</span>, 
-<span class="post_time">{how_long_ago(post['timestamp'])}</span>
-from <span class="post_place">{post['place']['name']}</span>
+—<span class="post_user">{post['user']['name']}</span><br/>
+<span class="post_time">{how_long_ago(post['timestamp'])}</span><br/>
+<span class="post_place">{post['place']['name']}</span>
 </div>
 '''
     def add_post(post):
@@ -213,7 +213,7 @@ from <span class="post_place">{post['place']['name']}</span>
         df['color']=df['user_id'].apply(get_color)
 
         s=df['num_likes']
-        df['size'] = s.apply(
+        df['size'] = max_size if len(df)<3 else dfs.apply(
             lambda n: translate_range(
                 n, 
                 (s.min(), s.max()),

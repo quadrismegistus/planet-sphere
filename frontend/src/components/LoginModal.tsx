@@ -24,15 +24,9 @@ const LoginModal: React.FC = () => {
 
   // Reset error message whenever username or password changes
   useEffect(() => {
+    console.log('resetting LoginModal error message')
     setErrorMessage("");
   }, [username, password]);
-
-  // Optionally, you could close the modal upon detecting a logged-in user
-//   useEffect(() => {
-//     if (user) {
-//       hideLoginModal();
-//     }
-//   }, [user, hideLoginModal]);
 
   return (
     <IonModal isOpen={loginIsOpen} onDidDismiss={hideLoginModal} className='side-modal'>

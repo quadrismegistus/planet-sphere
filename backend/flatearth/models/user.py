@@ -73,10 +73,10 @@ class User(Base):
     def __repr__(self):
         return f'User(id={self.id}, name={self.name})'
     
-    def post(self, txt='', lang='', lat=None, lon=None, ip=None, placename=None, reply_to=None, repost_of=None):
+    def post(self, txt='', lang='', geonames_id=None, lat=None, lon=None, ip=None, placename=None, reply_to=None, repost_of=None):
         from .models import Place, Txt, Post
         if not txt and not repost_of: return
-        place = Place.locate(lat,lon,ip=ip,placename=placename)
+        place = Place.locate(lat,lon,ip=ip,placename=placename,geonames_id=geonames_id)
         if place:
             text = Txt.getc(txt=txt, lang=lang)
             post = Post(

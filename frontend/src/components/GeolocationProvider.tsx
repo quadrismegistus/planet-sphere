@@ -31,6 +31,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
   const [locationInfo, setLocationInfo] = useState<any>(null);
 
   useEffect(() => {
+    console.log('booting GeolocationProvider')
     // Declare an async function inside the useEffect
     const startWatchingPosition = async () => {
       const watchId = await Geolocation.watchPosition({}, (position, err) => {
@@ -43,7 +44,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
           setLoading(false);
 
           // Fetch additional location info asynchronously
-          fetchLocationInfo(position.coords.latitude, position.coords.longitude);
+          // fetchLocationInfo(position.coords.latitude, position.coords.longitude);
         } else {
           console.error(err);
           setLoading(false);
@@ -60,20 +61,7 @@ export const GeolocationProvider: React.FC<GeolocationProviderProps> = ({ childr
     startWatchingPosition();
   }, []);
 
-  const fetchLocationInfo = async (lat: number, lon: number) => {
-    console.log(lat,lon,coords,'coords');
-    if (Math.abs(lat - coords.lat) > 0.1 || Math.abs(lon - coords.lon) > 0.1) {
-        try {
-        // Replace 'YOUR_API_ENDPOINT' with your actual API endpoint
-        const response = await axios.post(REACT_APP_API_URL+'/places/query', { lat, lon });
-        console.log('response!!',response.data);
-        setLocationInfo(response.data);
-        } catch (error) {
-        console.error('Failed to fetch location info:', error);
-        }
-    }
-  };
-
+  
   return (
     <GeolocationContext.Provider value={{ coords, loading, locationInfo }}>
       {children}

@@ -4,7 +4,7 @@ import { GeolocationDisplay } from '../components/GeolocationDisplay';
 import { MapDisplay } from '../components/MapDisplay';
 import PostModal from '../components/PostModal';
 import LoginModal from '../components/LoginModal';
-import LocationModal from '../components/LocationModal';
+import SettingsModal from '../components/SettingsModal';
 import { GeolocationProvider } from '../components/GeolocationProvider';
 import './MapTab.css';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
@@ -19,7 +19,7 @@ const MapTab: React.FC = () => {
           <MapDisplay />
           <PostModal />
           <LoginModal />
-          <LocationModal />
+          <SettingsModal />
 
       </IonContent>
     </IonPage>

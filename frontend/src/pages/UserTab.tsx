@@ -51,6 +51,7 @@ const UserTab: React.FC = () => {
   // const userToken = localStorage.getItem('username');
 
   useEffect(() => {
+    console.log('changing UserTab error msg');
     setErrorMessage("");
   }, [username, password]);
 

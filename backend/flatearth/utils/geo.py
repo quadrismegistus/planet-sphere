@@ -414,3 +414,60 @@ def get_country_colors():
 
 
 glat,glon = 31.5017, 34.4668
+geonames_id = 9958118
+
+class Geoname:
+    def __init__(self, id, loc=None, tree=None):
+        self.id = id
+        self._loc = None
+        self._tree = None
+
+    @classmethod
+    @cache_obj.memoize()
+    def query(self, id):
+        return list(reversed(list(geocoder.geonames(id, key='quadrismegistus', method='hierarchy'))))
+    
+    @cached_property
+    def loc(self):
+        return self._loc if self._loc is not None else self.tree[0]
+
+    @cached_property
+    def tree(self):
+        return self._tree if self._tree is not None else self.query(self.id)
+    
+    @property
+    def lat(self): return float(self.loc.lat)
+    @property
+    def lon(self): return float(self.loc.lng)
+
+    @property
+    def data(self): return self.loc.raw
+
+    @property
+    def long_name(self):
+        return ', '.join(loc.raw.get('toponymName','') for loc in self.tree)
+    
+    @property
+    def short_name(self):
+        return self.data.get('toponymName','')
+
+    def to_dict(self):
+        return dict(
+            lat = self.lat,
+            lon = self.lon,
+            name = self.short_name,
+            long_name = self.long_name,
+            geonames_id = self.id,
+            geonames_data = self.data,
+            contained_by=[loc.geonames_id for loc in self.tree[1:]],
+        )
+    
+    def to_db(self):
+        from .db import get_point
+        odx=self.to_dict()
+        odx['geonames_json'] = json.dumps(odx.pop('geonames_data'))
+        odx['point'] = get_point(self.lat, self.lon)
+        odx['contained_by'] = []
+        return odx
+    
+    

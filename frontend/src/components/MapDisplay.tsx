@@ -17,8 +17,8 @@ const MAPBOX_ACCESS_TOKEN = atob(MAPBOX_ACCESS_TOKEN_b64);
 
 const PROJECTION = 'lambertConformalConic';
 const ZOOMOUT_ZOOM = 0;
-const ZOOMIN_ZOOM = 16;
-const SHOW_POPUPS = false;
+const ZOOMIN_ZOOM = 14;
+const SHOW_POPUPS = true;
 
 
 const createTimeoutManager = () => {
@@ -87,6 +87,7 @@ export function MapDisplay() {
 
   // Function to fetch posts
   const fetchPosts = async () => {
+    console.log('fetching posts')
     try {
       const queryData = {
         type: "latest",
@@ -97,23 +98,64 @@ export function MapDisplay() {
       console.log(response);
       const uniqueNewPosts = response.data.filter(post => !postsQueue.some(existingPost => existingPost.id === post.id));
       console.log('new',uniqueNewPosts);
-      setPostsQueue(prevPosts => [...prevPosts, ...uniqueNewPosts]);
-      setPostsLoaded(true); // Indicate posts have been loaded
+      // setPostsQueue(prevPosts => [...prevPosts, ...uniqueNewPosts]);
+      // setPostsLoaded(true); // Indicate posts have been loaded
+      return uniqueNewPosts;
     } catch (error) {
       console.error('Error fetching posts', error);
+      return undefined;
     }
   };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  // useEffect(() => {
+    // const posts = fetchPosts();
+  // }, []);
 
   // Call advancePost once both the map and posts have loaded
   useEffect(() => {
+    console.log('posts loaded')
     if (postsLoaded && mapLoaded) {
       setTimeout(() => { advancePost(); }, 1000);
     }
   }, [postsLoaded, mapLoaded]);
+
+
+    // Inside your component
+  const [delay, setDelay] = useState(1000); // Initial delay of 1 second
+
+  useEffect(() => {
+    const unreadCount = postsQueue.length;
+    let timerId: any;
+
+    if (unreadCount >= 0 && unreadCount <= 10) {
+      console.log('trying to get posts, delay is currently',delay/1000)
+      // Only set the timeout if the unread count is within the specified range
+      timerId = setTimeout(() => {
+        fetchPosts()
+          .then((newPosts) => {
+            if (newPosts && newPosts.length > 0) {
+              // Reset delay if new posts were received
+              setDelay(1000); // Reset to initial delay
+              setPostsQueue(prevPosts => [...prevPosts, ...newPosts]);
+              setPostsLoaded(true); // Indicate posts have been loaded
+            } else {
+              // Increase delay for next fetch (exponential backoff)
+              setDelay((currentDelay) => Math.min(currentDelay * 5, 5 * 60 * 1000)); // Cap at 5 min
+            }
+          })
+          .catch((error) => {
+            console.error("Failed to fetch posts:", error);
+            // Optionally adjust delay on error as well
+              setDelay((currentDelay) => Math.min(currentDelay * 5, 5 * 60 * 1000)); // Cap at 5 min
+          });
+      }, delay);
+    }
+
+    // Cleanup function
+    return () => clearTimeout(timerId);
+  }, [postsQueue,delay]);
+
+
 
   // Handler for advancing posts (marking as read)
   const advancePost = () => {
@@ -372,7 +414,6 @@ export function MapDisplay() {
   // Add event listener for keydown to advance posts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log(event.key);
       if ((event.key === 'ArrowDown') && activePost) {
         // markPostRead(activePost);
         unzoomActivePost();
@@ -403,13 +444,13 @@ export function MapDisplay() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activePost, postsQueue]);
 
-  // Effect to fetch more posts when needed
-  useEffect(() => {
-    const unreadCount = postsQueue.length;
-    if (unreadCount <= 10) { // Threshold
-      fetchPosts();
-    }
-  }, [postsQueue]);
+  // // Effect to fetch more posts when needed
+  // useEffect(() => {
+  //   const unreadCount = postsQueue.length;
+  //   if (unreadCount <= 10) { // Threshold
+  //     fetchPosts();
+  //   }
+  // }, [postsQueue]);
 
   // if (loading) return <div>Loading geolocation...</div>;
 
@@ -426,8 +467,8 @@ export function MapDisplay() {
               longitude: 0, //coords.lon,
               zoom: ZOOMOUT_ZOOM,
           }}
-          maxZoom={17}
-          minZoom={0}
+          maxZoom={ZOOMIN_ZOOM}
+          minZoom={ZOOMOUT_ZOOM}
         //   viewState={{
         //     latitude: 0, //coords.lat,
         //     longitude: 0, //coords.lon,
@@ -473,6 +514,7 @@ export function MapDisplay() {
           ))}
       {SHOW_POPUPS && popupInfo && activePost && (
         <Popup
+          className='post-popup'
           latitude={popupInfo.lat}
           longitude={popupInfo.lon}
           closeButton={false}
@@ -531,7 +573,7 @@ export function MapDisplay() {
             </div>
           {/* </IonToolbar> */}
       
-          {popupInfo && (<div className="postbar" dangerouslySetInnerHTML={{ __html: popupInfo.content }} />)}
+          {/* {popupInfo && (<div className="postbar" dangerouslySetInnerHTML={{ __html: popupInfo.content }} />)} */}
       
           {/* </div> */}
       </div>

@@ -30,6 +30,7 @@ setupIonicReact();
 const App: React.FC = () => {
 
   useEffect(() => {
+    console.log('booting App')
     // Function to toggle dark mode
     const toggleDarkMode = (matches: boolean) => {
       document.body.classList.toggle('dark', matches);

@@ -13,13 +13,32 @@
     /* margin-left:45dvw; */
     /* margin-top:45dvh; */
     /* --width:50dvw; */
-    --height:250px;
-    --max-width:300px;
-    --min-width:300px;
-    --width:100vw;
+    /* --height:500px; */
+    --width:400px;
+    --max-width:100vh;
+    --max-height:80vh;
+    /* --overflow: hidden; */
+    /* overflow: hidden; */
+    /* --min-width:300px; */
     /* --min-height: 350px; */
     /* --min-width: 500px; */
     /* --max-width:100vw; */
     /* --max-height:50vh; */
     /* padding-bottom:56dvh; */
   }
+
+  /* .side-modal .inner-scroll, .side-modal ion-page, .side-modal #background-content, .side-modal .modal-wrapper { overflow:hidden !important; } */
+
+
+
+  /* Targeting the IonTextarea specifically */
+.side-modal ion-textarea::part(textarea):focus {
+  outline: none;
+  border:none;
+}
+
+.side-modal .ion-toolbar { 
+  display: 'flex';
+  justify-content: 'space-between';
+  align-items: 'center'
+}
