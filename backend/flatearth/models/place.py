@@ -8,7 +8,7 @@ class Place(Base):
     lon: Mapped[float]
     name: Mapped[str]
     long_name: Mapped[Optional[str]]
-    geonames_id: Mapped[int]
+    geonames_id: Mapped[Optional[int]]
     geonames_json: Mapped[str]
 
     contained_by = relationship(
@@ -49,11 +49,16 @@ class Place(Base):
 
     @classmethod
     def as_row(self, geo):
-        return dict(
+        odx=dict(
             point=geo.point_str,
             name=geo.name,
-            geopkl=geo.pkl
+            lat=geo.lat,
+            lon=geo.lon,
+            geonames_id=geo.geonames_id if hasattr(geo, 'geonames_id') else None,
+            geonames_json=json.dumps(geo.data) if hasattr(geo, 'data') else '{}'
         )
+        print('as_row =',odx)
+        return odx
     
     @classmethod
     def nearby(
@@ -74,7 +79,8 @@ class Place(Base):
             )
             lat,lon = geo.lat,geo.lon
 
-        point = get_point(self.lat, self.lon)
+        # point = get_point(self.lat, self.lon)
+        point = get_point(lat, lon)
 
         for place in get_db_session().query(self).order_by(
                 func.ST_Distance(
@@ -100,11 +106,15 @@ class Place(Base):
 
         # find nearby existing locs
         place = self.nearest(lat=lat, lon=lon, ip=ip, placename=placename, maxdist_km=maxdist_km)
-        
-        # # if no place and we have at least a name
-        # if not place and geo.name:
-        #     # create new place from geo
-        #     place = Place.create(**Place.as_row(geo))
+
+        if not place:
+            geo = Geocode(
+                lat=lat,
+                lon=lon,
+                ip=ip,
+                placename=placename
+            )
+            place = Place.create(**Place.as_row(geo))
         
         return place
     

@@ -8,29 +8,16 @@ import './PostModal.css';
 import { closeOutline } from 'ionicons/icons';
 import { REACT_APP_API_URL } from '../vars';
 import axios from 'axios';
-
-// Custom hook for handling textarea with character limit
-function useTextareaWithLimit(limit = 360) {
-  const [value, setValue] = useState('');
-
-  // Calculate the number of characters remaining
-  const charsRemaining = limit - value.length;
-
-  // Update the state value when the user types in the textarea
-  const handleChange = (event: TextareaCustomEvent) => {
-    if(event.target.value!=undefined) setValue(event.target.value);
-  };
-
-  return { value, charsRemaining, handleChange };
-}
+import { postsQueueState, activePostState } from '../entities/timelineEnts';
+import { useTextareaWithLimit } from '../utils/utils';
 
 const PostModal: React.FC = () => {
-    const { postIsOpen, hidePostModal, showPostModal, showLoginModal } = useModal();
+    const { postIsOpen, hidePostModal, showLoginModal } = useModal();
     const { user } = useAuth();
     const { chosenGeonamesId } = useReverseGeocoder();
     const { value, charsRemaining, handleChange } = useTextareaWithLimit(360);
     const [errormsg, SetErrormsg] = useState('');
-
+    
     useEffect(() => {
         if(!user && postIsOpen) {
             console.log('redirecting to login')
@@ -49,7 +36,9 @@ const PostModal: React.FC = () => {
           };
           console.log('message',message);
           const response = await axios.post(REACT_APP_API_URL+'/users/post', message);
-          console.log('posted:',response.data);
+          const newPostInfo = response.data;
+          postsQueueState.set(oldPosts => [newPostInfo, ...oldPosts]);
+          activePostState.set(newPostInfo);
           hidePostModal();
       } catch (error:any) {
         SetErrormsg(error.toString())

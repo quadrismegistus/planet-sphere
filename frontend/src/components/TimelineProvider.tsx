@@ -30,6 +30,7 @@ export const TimelineProvider: React.FC<{children:ReactNode}> = ({ children }) =
         
     // Hook to fetch on startup
     useEffect(() => {
+        console.log('hello????');
         (async () => {
             if(!postsLoadedState.get()) {
                 const posts = await fetchPosts(readPostIdsState.get());

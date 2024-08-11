@@ -96,7 +96,7 @@ export const MapDisplay: React.FC = () => {
     }
   };
 
-  const flyToPlace = (place:Place|undefined, zoom:number|undefined = undefined, speed:number=0) => {
+  const flyToPlace = (place:Place|undefined, zoom:number|undefined = undefined, speed:number=1) => {
     if(place && mapRef.current) {
       console.log('flying to place:',place);
       flyToOnMap(

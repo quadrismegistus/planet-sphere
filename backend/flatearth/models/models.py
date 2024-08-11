@@ -35,6 +35,7 @@ def test(clear=True):
     elon.follow(zuck)
     zuck.follow(marx)
 
+    print(post)
     elon.like(post)
     zuck.like(post)
 
